@@ -1,0 +1,81 @@
+import json
+import jobManager as jm
+import pickle
+import featureCreator as fc
+import math
+
+f = open("jobs.json", "r")
+jobs = json.loads(f.read())
+
+width, height = 249, 140
+
+def getIntervalPoint(point, lower, upper):
+  if point < lower:
+    return lower
+  if point > upper:
+    return upper
+  return point
+
+# returns the @rects idx with the biggest overlap with @rect
+def getBestCoverageRectIdx(rect, rects):
+  bestIdx = -1
+  bestArea = -1
+  coverage = -1 # 
+
+  rectArea = (rect[2] - rect[0]) * (rect[3] - rect[1])
+
+  for i in range(len(rects)):
+    overlapX1 = getIntervalPoint(rect[0], rects[i][0], rects[i][2])
+    overlapY1 = getIntervalPoint(rect[1], rects[i][1], rects[i][3])
+    overlapX2 = getIntervalPoint(rect[2], rects[i][0], rects[i][2])
+    overlapY2 = getIntervalPoint(rect[3], rects[i][1], rects[i][3])
+    lenX = overlapX2 - overlapX1
+    lenY = overlapY2 - overlapY1
+    area = lenX * lenY
+
+    if area > bestArea:
+      bestArea = area
+      bestIdx = i
+      coverage = (area / rectArea * 100) // 1
+
+  return bestIdx, coverage
+
+def getScores(rects, feature_path, top_k_stat, single_feature_array = False):
+  import open_clip
+  import torch.nn.functional as F
+
+  with open(feature_path, 'rb') as handle:
+    if single_feature_array:
+      rectFeatures = [pickle.load(handle).to("cuda")]
+    else:
+      rectFeatures = [features.to("cuda") for features in pickle.load(handle)]
+
+  model, _, tokenizer = jm.get_model_preprocess_tokenizer()
+
+  avg_position = 0
+  top_k_position = 0
+  avg_coverage = 0
+
+  for job in jobs:
+    rect = job["rect"]
+    id = job["id"]
+    bestRectIdx, coverage = getBestCoverageRectIdx(rect, rects)
+    frame_position = jm.get_frame_feature_position(job["desc"], job["frameIdx"], rectFeatures[bestRectIdx], model, tokenizer)
+    avg_position += frame_position
+    avg_coverage += coverage
+    if frame_position < top_k_stat:
+      top_k_position += 1
+    #print(f"id {id}, position {frame_position}, rect {bestRectIdx}, cov {int(coverage)} %")
+
+  avg_position /= len(jobs)
+  avg_coverage /= len(jobs)
+  print(f"{feature_path}: Average position: {math.floor(avg_position)}, Top {top_k_stat} positions: {top_k_position}/{len(jobs)}, Average coverage {math.floor(avg_coverage)} %")
+
+# iterates over jobs in jobs.json and the features specified below and prints stats about how the different grids performed
+top_k_stat = 20
+getScores([[0, 0, width, height]], 'features/whole_images.pickle', top_k_stat, single_feature_array=True)
+getScores(fc.get_corner_boundaries(width, height), 'corner_features.pickle', top_k_stat)
+getScores(fc.get_corner_overlap_boundaries(width, height), 'corner_overlap_features.pickle', top_k_stat)
+getScores(fc.get_corner_and_centerpiece_boundaries(width, height), 'corner_and_centerpiece_features.pickle', top_k_stat)
+getScores(fc.get_corner_and_centerpiece_overlap_boundaries(width, height), 'corner_and_centerpiece_overlap_features.pickle', top_k_stat)
+ 
