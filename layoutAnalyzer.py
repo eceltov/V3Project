@@ -73,7 +73,7 @@ def getScores(rects, feature_path, top_k_stat, single_feature_array = False):
 
 # iterates over jobs in jobs.json and the features specified below and prints stats about how the different grids performed
 top_k_stat = 20
-getScores([[0, 0, width, height]], 'features/whole_images.pickle', top_k_stat, single_feature_array=True)
+getScores([[0, 0, width, height]], 'whole_images.pickle', top_k_stat, single_feature_array=True)
 getScores(fc.get_corner_boundaries(width, height), 'corner_features.pickle', top_k_stat)
 getScores(fc.get_corner_overlap_boundaries(width, height), 'corner_overlap_features.pickle', top_k_stat)
 getScores(fc.get_corner_and_centerpiece_boundaries(width, height), 'corner_and_centerpiece_features.pickle', top_k_stat)
