@@ -1,8 +1,12 @@
 import json
 import jobManager as jm
 import pickle
-import featureCreator as fc
 import math
+import boundaries as b
+
+import sys
+sys.path.append('statistics')
+import plot
 
 f = open("jobs.json", "r")
 jobs = json.loads(f.read())
@@ -70,12 +74,21 @@ def getScores(rects, feature_path, top_k_stat, single_feature_array = False):
   avg_position /= len(jobs)
   avg_coverage /= len(jobs)
   print(f"{feature_path}: Average position: {math.floor(avg_position)}, Top {top_k_stat} positions: {top_k_position}/{len(jobs)}, Average coverage {math.floor(avg_coverage)} %")
+  return avg_position
 
 # iterates over jobs in jobs.json and the features specified below and prints stats about how the different grids performed
-top_k_stat = 20
-getScores([[0, 0, width, height]], 'whole_images.pickle', top_k_stat, single_feature_array=True)
-getScores(fc.get_corner_boundaries(width, height), 'corner_features.pickle', top_k_stat)
-getScores(fc.get_corner_overlap_boundaries(width, height), 'corner_overlap_features.pickle', top_k_stat)
-getScores(fc.get_corner_and_centerpiece_boundaries(width, height), 'corner_and_centerpiece_features.pickle', top_k_stat)
-getScores(fc.get_corner_and_centerpiece_overlap_boundaries(width, height), 'corner_and_centerpiece_overlap_features.pickle', top_k_stat)
- 
+top_k_stat = 100
+
+features_and_boundaries = [
+  ('features_laion/whole_features.pickle', b.get_whole_boundaries(width, height)),
+  ('features_laion/corner_features.pickle', b.get_corner_boundaries(width, height)),
+  ('features_laion/corner_overlap_features.pickle', b.get_corner_overlap_boundaries(width, height)),
+  ('features_laion/corner_and_centerpiece_features.pickle', b.get_corner_and_centerpiece_boundaries(width, height)),
+  ('features_laion/corner_and_centerpiece_overlap_features.pickle', b.get_corner_and_centerpiece_overlap_boundaries(width, height)),
+]
+
+stats = [getScores(boundaries, features, top_k_stat) for features, boundaries in features_and_boundaries]
+
+plot.bar_chart([
+  (features_and_boundaries[i][0], stats[i]) for i in range(len(features_and_boundaries))
+])

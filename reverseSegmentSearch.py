@@ -1,5 +1,4 @@
 import pickle
-import featureCreator as fc
 import jobManager as jm
 import torch.nn.functional as F
 import torch
@@ -74,32 +73,32 @@ def get_matching_segmentation_analysis_frame_count(frame_path, features, tests):
 
 # this section is ugly because this was just to check whether the reverse grid image search works 
 frame_paths = [
-  "D:\\school\\videa\\seaPics\\Fiji_Jan2011_0001\\Fiji_Jan2011_0001_049.jpg",
-  "D:\\school\\videa\\seaPics\\Oahu_Jul2022_0015\\Oahu_Jul2022_0015_001.jpg",
-  "D:\\school\\videa\\seaPics\\Oahu_Jul2022_0030\\Oahu_Jul2022_0030_024.jpg",
-  "D:\\school\\videa\\seaPics\\Okinawa_Feb2020_0017\\Okinawa_Feb2020_0017_005.jpg",
-  "D:\\school\\videa\\seaPics\\Padangbai_Jun2022_0054\\Padangbai_Jun2022_0054_022.jpg",
-  "D:\\school\\videa\\seaPics\\Tulamben_Jun2022_0012\\Tulamben_Jun2022_0012_006.jpg",
-  "D:\\school\\videa\\seaPics\\Oahu1_Jul2022_0054\\Oahu1_Jul2022_0054_002.jpg",
-  "D:\\school\\videa\\seaPics\\Oahu2_Jul2022_0035\\Oahu2_Jul2022_0035_006.jpg",
-  "D:\\school\\videa\\seaPics\\Okinawa_Feb2020_0026\\Okinawa_Feb2020_0026_005.jpg",
-  "D:\\school\\videa\\seaPics\\Padangbai_Jun2022_0031\\Padangbai_Jun2022_0031_014.jpg",
-  "D:\\school\\videa\\seaPics\\PhuQuoc_Jun2022_0024\\PhuQuoc_Jun2022_0024_004.jpg",
-  "D:\\school\\videa\\seaPics\\RajaAmpat_Jan2013_0008\\RajaAmpat_Jan2013_0008_003.jpg",
-  "D:\\school\\videa\\seaPics\\Triton_Dec2018_0001\\Triton_Dec2018_0001_001.jpg",
-  "D:\\school\\videa\\seaPics\\Tulamben_Jun2022_0010\\Tulamben_Jun2022_0010_013.jpg",
-  "D:\\school\\videa\\seaPics\\Tulamben_Jun2022_0028\\Tulamben_Jun2022_0028_006.jpg",
-  "D:\\school\\videa\\seaPics\\Tulamben_Jun2022_0048\\Tulamben_Jun2022_0048_003.jpg",
-  "D:\\school\\videa\\seaPics\\Tulamben1_Jun2022_0049\\Tulamben1_Jun2022_0049_001.jpg",
-  "D:\\school\\videa\\seaPics\\Tulamben2_Jun2022_0032\\Tulamben2_Jun2022_0032_012.jpg",
-  "D:\\school\\videa\\seaPics\\Tulamben2_Jun2022_0057\\Tulamben2_Jun2022_0057_022.jpg",
+  "D:\\mvk_resize\\Fiji_Jan2011_0001\\Fiji_Jan2011_0001_049.jpg",
+  "D:\\mvk_resize\\Oahu_Jul2022_0015\\Oahu_Jul2022_0015_001.jpg",
+  "D:\\mvk_resize\\Oahu_Jul2022_0030\\Oahu_Jul2022_0030_024.jpg",
+  "D:\\mvk_resize\\Okinawa_Feb2020_0017\\Okinawa_Feb2020_0017_005.jpg",
+  "D:\\mvk_resize\\Padangbai_Jun2022_0054\\Padangbai_Jun2022_0054_022.jpg",
+  "D:\\mvk_resize\\Tulamben_Jun2022_0012\\Tulamben_Jun2022_0012_006.jpg",
+  "D:\\mvk_resize\\Oahu1_Jul2022_0054\\Oahu1_Jul2022_0054_002.jpg",
+  "D:\\mvk_resize\\Oahu2_Jul2022_0035\\Oahu2_Jul2022_0035_006.jpg",
+  "D:\\mvk_resize\\Okinawa_Feb2020_0026\\Okinawa_Feb2020_0026_005.jpg",
+  "D:\\mvk_resize\\Padangbai_Jun2022_0031\\Padangbai_Jun2022_0031_014.jpg",
+  "D:\\mvk_resize\\PhuQuoc_Jun2022_0024\\PhuQuoc_Jun2022_0024_004.jpg",
+  "D:\\mvk_resize\\RajaAmpat_Jan2013_0008\\RajaAmpat_Jan2013_0008_003.jpg",
+  "D:\\mvk_resize\\Triton_Dec2018_0001\\Triton_Dec2018_0001_001.jpg",
+  "D:\\mvk_resize\\Tulamben_Jun2022_0010\\Tulamben_Jun2022_0010_013.jpg",
+  "D:\\mvk_resize\\Tulamben_Jun2022_0028\\Tulamben_Jun2022_0028_006.jpg",
+  "D:\\mvk_resize\\Tulamben_Jun2022_0048\\Tulamben_Jun2022_0048_003.jpg",
+  "D:\\mvk_resize\\Tulamben1_Jun2022_0049\\Tulamben1_Jun2022_0049_001.jpg",
+  "D:\\mvk_resize\\Tulamben2_Jun2022_0032\\Tulamben2_Jun2022_0032_012.jpg",
+  "D:\\mvk_resize\\Tulamben2_Jun2022_0057\\Tulamben2_Jun2022_0057_022.jpg",
 ]
 
 feature_paths = [
-  "corner_features.pickle",
-  "corner_overlap_features.pickle",
-  "corner_and_centerpiece_features.pickle",
-  "corner_and_centerpiece_overlap_features.pickle"
+  "features_laion/corner_features.pickle",
+  "features_laion/corner_overlap_features.pickle",
+  "features_laion/corner_and_centerpiece_features.pickle",
+  "features_laion/corner_and_centerpiece_overlap_features.pickle"
 ]
 
 feature_list = []

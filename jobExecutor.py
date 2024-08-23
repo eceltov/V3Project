@@ -1,4 +1,4 @@
-import jobManager as jb
+import jobManager as jm
 
-jb.process_jobs()
-jb.get_job_stats()
+jm.process_jobs()
+jm.get_job_stats()

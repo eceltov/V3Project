@@ -13,6 +13,8 @@ This simulates the user finding an object of interest in the frame, writing a de
 
 - `featureCreator.py`: A script for creating grid features used by the other scripts.
 
+- `boundaries.py`: A library containing functions for determining image boundaries used for feature creation and grid analysis.
+
 - `jobExecutor.py`: A script which goes through all jobs in `jobs.json`, extracts its bounding rectangles, and for each of these rectangles creates a feature set for the whole frame database where the frames are cropped to the bounding rectangle, effectively hiding all parts of frames that were outside of the rectangle.
 This is used for analysis whether text queries perform better in smaller frame segments filled with objects of interest, or whether the extended frame context helps the search engine.
 This script takes a long time to execute due to the amount of features it needs to create.

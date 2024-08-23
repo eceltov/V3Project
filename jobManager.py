@@ -8,9 +8,14 @@ device = "cuda"
 def get_model_preprocess_tokenizer():
   import open_clip
 
-  model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32',
-    pretrained='laion2b_s34b_b79k', device=device)
-  tokenizer = open_clip.get_tokenizer('ViT-B-32')
+  model, _, preprocess = open_clip.create_model_and_transforms(
+    'hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K',
+    device=device)
+  tokenizer = open_clip.get_tokenizer('hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K')
+
+  # model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32',
+  #   pretrained='laion2b_s34b_b79k', device=device)
+  # tokenizer = open_clip.get_tokenizer('ViT-B-32')
 
   return model, preprocess, tokenizer
 
