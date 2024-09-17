@@ -144,17 +144,18 @@ corner_centerpiece_query_suffix_additions = [
 # iterates over jobs in jobs.json and the features specified below and prints stats about how the different grids performed
 top_k_stat = 100
 
+feature_folder = "."
 features_and_boundaries = [
   ('whole_features.pickle', b.get_whole_boundaries(width, height)),
-  # ('corner_features.pickle', b.get_corner_boundaries(width, height)),
-  # ('corner_overlap_features.pickle', b.get_corner_overlap_boundaries(width, height)),
-  # ('corner_and_centerpiece_features.pickle', b.get_corner_and_centerpiece_boundaries(width, height)),
-  # ('corner_and_centerpiece_overlap_features.pickle', b.get_corner_and_centerpiece_overlap_boundaries(width, height)),
-  # ('8_piece_overlap_features.pickle', b.get_8_piece_overlap_boundaries(width, height)),
-  # ('8_piece_center_overlap_features.pickle', b.get_8_piece_center_overlap_boundaries(width, height)),
+  ('corner_features.pickle', b.get_corner_boundaries(width, height)),
+  ('corner_overlap_features.pickle', b.get_corner_overlap_boundaries(width, height)),
+  ('corner_and_centerpiece_features.pickle', b.get_corner_and_centerpiece_boundaries(width, height)),
+  ('corner_and_centerpiece_overlap_features.pickle', b.get_corner_and_centerpiece_overlap_boundaries(width, height)),
+  ('8_piece_overlap_features.pickle', b.get_8_piece_overlap_boundaries(width, height)),
+  ('8_piece_center_overlap_features.pickle', b.get_8_piece_center_overlap_boundaries(width, height)),
 ]
 
-stats = [getScores(boundaries, features, top_k_stat) for features, boundaries in features_and_boundaries]
+stats = [getScores(boundaries, f"{feature_folder}/{features}", top_k_stat) for features, boundaries in features_and_boundaries]
 # print("\nlocalized:")
 # query_localized_stats = [
 #   getQueryLocalizedScores(b.get_corner_boundaries(width, height), "whole_features.pickle", top_k_stat, corner_query_prefix_additions, "prefix"),

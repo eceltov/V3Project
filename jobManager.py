@@ -10,6 +10,17 @@ def get_model_preprocess_tokenizer():
   import open_clip
   import torch
 
+  # new fast but unperformant model from Konstantin
+  # model, _, preprocess = open_clip.create_model_and_transforms(
+  #   'ViT-L-14-336',
+  #   pretrained="openai",
+  #   device=device)
+  # checkpoint_path = 'MCIP-ViT-L-14-336.pth'
+  # mcip_state_dict = torch.load(checkpoint_path)
+  # model.load_state_dict(mcip_state_dict, strict=True)
+  # tokenizer = open_clip.get_tokenizer('ViT-L-14-336')
+
+  # new model from Konstantin
   model, _, preprocess = open_clip.create_model_and_transforms(
     'ViT-SO400M-14-SigLIP-384',
     pretrained="webli",
@@ -17,14 +28,15 @@ def get_model_preprocess_tokenizer():
   checkpoint_path = 'MCIP-ViT-SO400M-14-SigLIP-384.pth'
   mcip_state_dict = torch.load(checkpoint_path)
   model.load_state_dict(mcip_state_dict, strict=True)
-
   tokenizer = open_clip.get_tokenizer('ViT-SO400M-14-SigLIP-384')
 
-  #   model, _, preprocess = open_clip.create_model_and_transforms(
+  # model used in the previous competition
+  # model, _, preprocess = open_clip.create_model_and_transforms(
   #   'hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K',
   #   device=device)
   # tokenizer = open_clip.get_tokenizer('hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K')
 
+  # bad-performing but fast model
   # model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32',
   #   pretrained='laion2b_s34b_b79k', device=device)
   # tokenizer = open_clip.get_tokenizer('ViT-B-32')
