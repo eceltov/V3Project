@@ -21,14 +21,14 @@ def get_model_preprocess_tokenizer():
   # tokenizer = open_clip.get_tokenizer('ViT-L-14-336')
 
   # new model from Konstantin
-  model, _, preprocess = open_clip.create_model_and_transforms(
-    'ViT-SO400M-14-SigLIP-384',
-    pretrained="webli",
-    device=device)
-  checkpoint_path = 'MCIP-ViT-SO400M-14-SigLIP-384.pth'
-  mcip_state_dict = torch.load(checkpoint_path)
-  model.load_state_dict(mcip_state_dict, strict=True)
-  tokenizer = open_clip.get_tokenizer('ViT-SO400M-14-SigLIP-384')
+  # model, _, preprocess = open_clip.create_model_and_transforms(
+  #   'ViT-SO400M-14-SigLIP-384',
+  #   pretrained="webli",
+  #   device=device)
+  # checkpoint_path = 'MCIP-ViT-SO400M-14-SigLIP-384.pth'
+  # mcip_state_dict = torch.load(checkpoint_path)
+  # model.load_state_dict(mcip_state_dict, strict=True)
+  # tokenizer = open_clip.get_tokenizer('ViT-SO400M-14-SigLIP-384')
 
   # model used in the previous competition
   # model, _, preprocess = open_clip.create_model_and_transforms(
@@ -37,9 +37,9 @@ def get_model_preprocess_tokenizer():
   # tokenizer = open_clip.get_tokenizer('hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K')
 
   # bad-performing but fast model
-  # model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32',
-  #   pretrained='laion2b_s34b_b79k', device=device)
-  # tokenizer = open_clip.get_tokenizer('ViT-B-32')
+  model, _, preprocess = open_clip.create_model_and_transforms('ViT-B-32',
+    pretrained='laion2b_s34b_b79k', device=device)
+  tokenizer = open_clip.get_tokenizer('ViT-B-32')
 
   return model, preprocess, tokenizer
 
@@ -163,6 +163,42 @@ def save_clip_section_features(filenames, pickle_filename, section_count, get_im
 
   with open(pickle_filename, 'wb') as handle:
     pickle.dump(concat_sections, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def save_clip_box_features(filenames, pickle_filename):
+  import torch
+  from detectionBoxes import DetectionBoxes
+
+  with open("detectionBoxes.pickle", 'rb') as handle:
+    detection_boxes: DetectionBoxes = pickle.load(handle)
+
+  model, preprocess, _ = get_model_preprocess_tokenizer()
+
+  with torch.no_grad(), torch.cuda.amp.autocast():
+    features = []
+    for frame_idx in range(len(filenames)):
+      if frame_idx % 100 == 0:
+        print("processed frames:", frame_idx)
+
+      # append an empty feature tensor if there are no detections for the frame
+      if detection_boxes.counts[frame_idx] == 0:
+        features.append(torch.tensor([]))
+        continue
+
+      box_features = []
+      for box_idx in range(detection_boxes.counts[frame_idx]):
+        box = detection_boxes.get_box(frame_idx, box_idx)
+        frame = Image.open(filenames[frame_idx])
+        cropped = frame.crop(box)
+
+        preprocessed = preprocess(cropped).unsqueeze(0).to(device)
+        box_features.append(model.encode_image(preprocessed).to("cpu"))
+        preprocessed.to("cpu")
+
+      frame_features = torch.concat(box_features)
+      features.append(frame_features)
+
+  with open(pickle_filename, 'wb') as handle:
+    pickle.dump(features, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def get_frame_feature_position(text, frame_idx, features, model, tokenizer):
