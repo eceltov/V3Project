@@ -1,3 +1,6 @@
 __pycache__
 *.pickle
 features*/
+*.zip
+*.pth
+*.pt
