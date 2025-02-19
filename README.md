@@ -4,7 +4,7 @@ A collection of scripts intended for the analysis of grid search in image search
 
 ## Scripts
 
-- `selectiveDescriber.py`: A window app that allows the user to select portions of frames and annotate them with text queries that could be used to search for the frame in the search engine.
+- `annotator.py`: A window app that allows the user to select portions of frames and annotate them with text queries that could be used to search for the frame in the search engine.
 Each annotation is saved in the `jobs.json` file.
 
 - `layoutAnalyzer.py`: A script which goes through the annotations in `jobs.json` and analyzes the performance of different grids.
