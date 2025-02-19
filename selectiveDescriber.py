@@ -5,6 +5,7 @@ import numpy as np
 import random
 import math
 import jobManager as jm
+import json
 
 filenames, _, _, frame_path_to_frame_idx_map = jm.get_images_metadata()
 
@@ -17,9 +18,6 @@ def get_image_size():
 dpg.create_context()
 dpg.create_viewport()
 dpg.setup_dearpygui()
-
-# whether the user can draw the selection rectangle
-selecting = True
 
 screen_width = 1920
 screen_height = 1080
@@ -72,22 +70,6 @@ def next_img_shortcut():
 
   dpg.set_value("tex", img)
   print(f"showing {filename}")
-
-def next_img_static_shortcut():
-  # do not show a new image while the user is typing and presses return by error
-  if not selecting:
-    return
-
-  dpg.delete_item("img")
-  dpg.delete_item("tex")
-  
-  img, filename = get_random_dpg_image()
-  with dpg.texture_registry():
-    dpg.add_static_texture(width=scaled_img_width, height=scaled_img_height, default_value=img, tag="tex")
-  dpg.add_image("tex", tag="img", pos=[img_x, img_y], parent=window)
-  dpg.set_value("filepath", filename)
-
-  print(f"showing {filename}")
   
 drawing = False
 drawing_start_x = 0
@@ -112,14 +94,21 @@ def confine_to_boundaries(value, min, max):
     return max
   return value
 
+def draw_rect(tag, color):
+  dpg.delete_item(tag)
+  rect_offset = -10
+  dpg.draw_rectangle(
+    [drawing_start_x + rect_offset, drawing_start_y - rect_offset],
+    [drawing_stop_x + rect_offset, drawing_stop_y - rect_offset],
+    tag=tag,
+    thickness=2,
+    color=color,
+    parent=window
+  )
+
 def mouse_down_callback(sender, app_data):
   global drawing, drawing_start_x, drawing_start_y, drawing_stop_x, drawing_stop_y
 
-  print("mouse down")
-
-  if not selecting:
-    return
-  
   # boundaries for the cursor
   min_x = img_x_norm
   max_x = img_x_norm + scaled_img_width
@@ -138,16 +127,7 @@ def mouse_down_callback(sender, app_data):
     # if the mouse is outside the bounds, confine it within the image
     drawing_stop_x = confine_to_boundaries(x, min_x, max_x)
     drawing_stop_y = confine_to_boundaries(y, min_y, max_y)
-    dpg.delete_item("rect")
-    rect_offset = -10
-    dpg.draw_rectangle(
-      [drawing_start_x + rect_offset, drawing_start_y - rect_offset],
-      [drawing_stop_x + rect_offset, drawing_stop_y - rect_offset],
-      tag="rect",
-      thickness=1,
-      color=[255,255,150],
-      parent=window
-    )
+    draw_rect("rect", [255,255,150])
     
 def get_image_section(filename, coords, upscale=False):
   # swap coords so that the first point has lower coords than the second
@@ -156,11 +136,13 @@ def get_image_section(filename, coords, upscale=False):
     x1, x2 = x2, x1
   if y1 > y2:
     y1, y2 = y2, y1
+  
   image = Image.open(filename)
   section = image.crop((x1, y1, x2, y2))
 
   width = section.width
   height = section.height
+
 
   # upscale the image
   if upscale:
@@ -179,11 +161,6 @@ def get_image_section(filename, coords, upscale=False):
 
 def mouse_release_callback(sender, app_data):
   global drawing, drawing_stop_x, drawing_stop_y
-
-  print("mouse release")
-
-  if not selecting:
-    return
 
   drawing = False
 
@@ -206,28 +183,78 @@ def mouse_release_callback(sender, app_data):
   print(drawing_start_x, drawing_start_y, drawing_stop_x, drawing_stop_y)
   print(get_image_selection_coords())
 
-def train_callback():
-  global selecting
+# adds an annotation to the json file
+def save_annotation(short, long, frameIdx, rect):
+  filename = "annotations.json"
+  # create file if it does not exist
+  if not os.path.exists(filename):
+    with open(filename, 'w') as file:
+      json.dump([], file)
 
-  if not selecting:
-    # submit the job and toggle the drawing mode
-    text = dpg.get_value("prompt")
-    coords = get_image_selection_coords()
-    filepath = dpg.get_value("filepath")
-    jm.add_job(text, frame_path_to_frame_idx_map[filepath], coords)
-    dpg.hide_item("prompt")
-  else:
-    # focus text mode
-    dpg.set_value("prompt", "")
-    dpg.show_item("prompt")
-    dpg.focus_item("prompt")
+  with open(filename, "r+") as file:
+    annotations = json.loads(file.read())
+    file.seek(0)
 
-  # change text
-  selecting = not selecting
-  if selecting:
-    dpg.set_value("drawing_text", "Drawing ENABLED")
-  else:
-    dpg.set_value("drawing_text", "Drawing DISABLED")
+    annotations.append({
+      "id": len(annotations),
+      "frameIdx": frameIdx,
+      "desc_short": short,
+      "desc_long": long,
+      "rect": rect
+    })
+
+    file.write(json.dumps(annotations))
+    dpg.set_value("annotations", f"Annotations: {len(annotations)}")
+
+img_annotations = 0
+
+# submit the annotation
+def submit_callback():
+  global img_annotations
+
+  if drawing_start_x - drawing_stop_x == 0 or drawing_start_y - drawing_stop_y == 0:
+    dpg.set_value("error", "Please draw a rectangle with a positive surface area.")
+    return
+
+
+  text_short = dpg.get_value("prompt_short")
+  text_long = dpg.get_value("prompt_long")
+  if len(text_short) == 0 or len(text_long) == 0:
+    dpg.set_value("error", "Please fill out both the short and long description.")
+    return
+
+  dpg.set_value("error", "")
+  coords = get_image_selection_coords()
+  filepath = dpg.get_value("filepath")
+  save_annotation(text_short, text_long, frame_path_to_frame_idx_map[filepath], coords)
+  dpg.delete_item("rect")
+  draw_rect(f"rect{img_annotations}", [0, 0, 0])
+  img_annotations += 1
+
+def next_img_shortcut():
+  global drawing, drawing_start_x, drawing_start_y, drawing_stop_x, drawing_stop_y
+  # reset rectangle coordinates
+  drawing = False
+  drawing_start_x = 0
+  drawing_stop_x = 0
+  drawing_start_y = 0
+  drawing_stop_y = 0
+
+  dpg.delete_item("img")
+  dpg.delete_item("tex")
+
+  # remove rectangles
+  dpg.delete_item("rect")
+  for i in range(img_annotations):
+    dpg.delete_item(f"rect{i}")
+  
+  img, filename = get_random_dpg_image()
+  with dpg.texture_registry():
+    dpg.add_static_texture(width=scaled_img_width, height=scaled_img_height, default_value=img, tag="tex")
+  dpg.add_image("tex", tag="img", pos=[img_x, img_y], parent=window)
+  dpg.set_value("filepath", filename)
+
+  print(f"showing {filename}")
 
 with dpg.handler_registry():
     dpg.add_mouse_down_handler(callback=mouse_down_callback)
@@ -238,21 +265,22 @@ with dpg.texture_registry():
   dpg.add_static_texture(width=scaled_img_width, height=scaled_img_height, default_value=img, tag="tex")
 
 with dpg.handler_registry():
-  dpg.add_key_press_handler(key=dpg.mvKey_Return, callback=next_img_static_shortcut)
-  dpg.add_key_press_handler(key=dpg.mvKey_F1, callback=train_callback)
+  dpg.add_key_press_handler(key=dpg.mvKey_F12, callback=next_img_shortcut)
+  dpg.add_key_press_handler(key=dpg.mvKey_Return, callback=submit_callback)
 
 with dpg.window(label="Image Window", width=screen_width, height=screen_height, no_collapse=True, no_resize=True, no_close=True, no_move=True, no_title_bar=True, pos=[0, 0]) as window:
-  dpg.add_input_text(tag="prompt")
-  dpg.add_text("Drawing ENABLED", tag="drawing_text")  
-  dpg.add_text("[Return] Show next image")  
-  dpg.add_text("[F1] Toggle text/Submit and draw")  
+  dpg.add_input_text(hint="short description", tag="prompt_short")
+  dpg.add_input_text(hint="a longer and more detailed description of the selected object", tag="prompt_long")
+  dpg.add_button(label="[Return] Save Annotation", tag="save", callback=submit_callback)
+  dpg.add_button(label="[F12] Next Frame", tag="next", callback=next_img_shortcut)
+  dpg.add_text("", tag="annotations")  
   dpg.add_text(filename, tag="filepath")  
   dpg.add_text(f"Selection: None", tag="selection")  
+  dpg.add_text("", tag="error", color=[255, 120, 120])  
   dpg.add_image("tex", tag="img", pos=[img_x, img_y])
 
   dpg.add_text("Selection preview:", pos=(preview_x, preview_y - 20))
 
-dpg.hide_item("prompt")
 dpg.show_viewport()
 dpg.toggle_viewport_fullscreen()
 dpg.start_dearpygui()
