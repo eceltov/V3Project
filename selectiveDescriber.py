@@ -6,6 +6,14 @@ import random
 import math
 import jobManager as jm
 
+filenames, _, _, frame_path_to_frame_idx_map = jm.get_images_metadata()
+
+def get_image_size():
+  image = Image.open(filenames[0])
+  width = image.width
+  height = image.height
+  return width, height
+
 dpg.create_context()
 dpg.create_viewport()
 dpg.setup_dearpygui()
@@ -16,16 +24,35 @@ selecting = True
 screen_width = 1920
 screen_height = 1080
 
-img_upscale = 5
+# cursor position errors due to paddings and margins
+cursor_x_error = -3
+cursor_y_error = -2
+# img position errors due to paddings and margins
+img_y_error = 18
+img_x_error = -2
 
-img_x = 50
+img_upscale = 2
+
+img_x = 20
 img_y = 200
+# positions without errors
+img_x_norm = img_x - img_x_error
+img_y_norm = img_y - img_y_error
 
-preview_x = 1350
-preview_y = 100
+base_img_width, base_img_height = get_image_size()
+scaled_img_width = base_img_width * img_upscale
+scaled_img_height = base_img_height * img_upscale
 
-# get images address
-filenames, _, _, frame_path_to_frame_idx_map = jm.get_images_metadata()
+preview_x = 1400
+preview_y = 200
+max_previes_width = screen_width - preview_x - 20
+max_previes_height = screen_height - preview_y - 20
+
+def mouse_pos():
+  x, y = dpg.get_mouse_pos()
+  x -= cursor_x_error
+  y -= cursor_y_error
+  return x, y
 
 def image_to_dpg(image):
   image.putalpha(255)
@@ -34,16 +61,14 @@ def image_to_dpg(image):
 def get_random_dpg_image():
   roll = random.randint(0, len(filenames) - 1)
   image = Image.open(filenames[roll])
-  width = image.width * img_upscale
-  height = image.height * img_upscale
-  image = image.resize((width, height))
+  image = image.resize((scaled_img_width, scaled_img_height))
   image.putalpha(255)
   dpg_image = np.frombuffer(image.tobytes(), dtype=np.uint8) / 255.0
 
-  return (dpg_image, filenames[roll], width, height)
+  return (dpg_image, filenames[roll])
 
 def next_img_shortcut():
-  img, filename, img_width, img_height = get_random_dpg_image()
+  img, filename = get_random_dpg_image()
 
   dpg.set_value("tex", img)
   print(f"showing {filename}")
@@ -56,9 +81,9 @@ def next_img_static_shortcut():
   dpg.delete_item("img")
   dpg.delete_item("tex")
   
-  img, filename, img_width, img_height = get_random_dpg_image()
+  img, filename = get_random_dpg_image()
   with dpg.texture_registry():
-    dpg.add_static_texture(width=img_width, height=img_height, default_value=img, tag="tex")
+    dpg.add_static_texture(width=scaled_img_width, height=scaled_img_height, default_value=img, tag="tex")
   dpg.add_image("tex", tag="img", pos=[img_x, img_y], parent=window)
   dpg.set_value("filepath", filename)
 
@@ -71,30 +96,58 @@ drawing_stop_x = 0
 drawing_stop_y = 0
 
 def get_image_selection_coords():
-  y_err = -4
+  x_err = 1
+  y_err = -9
 
-  x_start = math.floor((drawing_start_x - img_x) / img_upscale)
+  x_start = math.floor((drawing_start_x - img_x) / img_upscale) - x_err
   y_start = math.floor((drawing_start_y - img_y) / img_upscale) - y_err
-  x_end = math.floor((drawing_stop_x - img_x) / img_upscale)
+  x_end = math.floor((drawing_stop_x - img_x) / img_upscale) - x_err
   y_end = math.floor((drawing_stop_y - img_y) / img_upscale) - y_err
   return x_start, y_start, x_end, y_end
 
+def confine_to_boundaries(value, min, max):
+  if value < min:
+    return min
+  elif value > max:
+    return max
+  return value
+
 def mouse_down_callback(sender, app_data):
-  global drawing, drawing_start_x, drawing_start_y
+  global drawing, drawing_start_x, drawing_start_y, drawing_stop_x, drawing_stop_y
 
   print("mouse down")
 
   if not selecting:
     return
+  
+  # boundaries for the cursor
+  min_x = img_x_norm
+  max_x = img_x_norm + scaled_img_width
+  min_y = img_y_norm
+  max_y = img_y_norm + scaled_img_height
 
-  x, y = dpg.get_mouse_pos()
+  x, y = mouse_pos()
+  # check whether the mouse is inside the bounds
+  if not drawing and (x < min_x or x >= max_x or y < img_y_norm or y >= max_y):
+    return
+  
   if not drawing:
     drawing_start_x, drawing_start_y = x, y
     drawing = True
   else:
+    # if the mouse is outside the bounds, confine it within the image
+    drawing_stop_x = confine_to_boundaries(x, min_x, max_x)
+    drawing_stop_y = confine_to_boundaries(y, min_y, max_y)
     dpg.delete_item("rect")
     rect_offset = -10
-    dpg.draw_rectangle([drawing_start_x + rect_offset, drawing_start_y - rect_offset], [x + rect_offset, y - rect_offset], tag="rect", thickness=1, color=[255,255,150], parent=window)
+    dpg.draw_rectangle(
+      [drawing_start_x + rect_offset, drawing_start_y - rect_offset],
+      [drawing_stop_x + rect_offset, drawing_stop_y - rect_offset],
+      tag="rect",
+      thickness=1,
+      color=[255,255,150],
+      parent=window
+    )
     
 def get_image_section(filename, coords, upscale=False):
   image = Image.open(filename)
@@ -116,8 +169,6 @@ def mouse_release_callback(sender, app_data):
   if not selecting:
     return
 
-  x, y = dpg.get_mouse_pos()
-  drawing_stop_x, drawing_stop_y = x, y
   drawing = False
 
   x1, y1, x2, y2 = get_image_selection_coords()
@@ -167,8 +218,8 @@ with dpg.handler_registry():
     dpg.add_mouse_release_handler(callback=mouse_release_callback)
 
 with dpg.texture_registry():
-  img, filename, img_width, img_height = get_random_dpg_image()
-  dpg.add_static_texture(width=img_width, height=img_height, default_value=img, tag="tex")
+  img, filename = get_random_dpg_image()
+  dpg.add_static_texture(width=scaled_img_width, height=scaled_img_height, default_value=img, tag="tex")
 
 with dpg.handler_registry():
   dpg.add_key_press_handler(key=dpg.mvKey_Return, callback=next_img_static_shortcut)
