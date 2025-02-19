@@ -4,10 +4,34 @@ from PIL import Image
 import numpy as np
 import random
 import math
-import jobManager as jm
 import json
 
-filenames, _, _, frame_path_to_frame_idx_map = jm.get_images_metadata()
+def get_images_metadata():
+  f = open("config.json", "r")
+  config = json.loads(f.read())
+  dataset_path = config["datasetPath"]
+
+  filepaths = []
+  video_to_frame_indices_map = {}
+  frame_idx_to_frame_path_map = {}
+  frame_path_to_frame_idx_map = {}
+
+  idx = 0
+  for dirname in sorted(os.listdir(dataset_path)):
+    dirpath = os.path.join(dataset_path, dirname)
+    video_indices = []
+    for fn in sorted(os.listdir(dirpath)):
+      filename = os.path.join(dirpath, fn)
+      filepaths.append(filename)
+      video_indices.append(idx)
+      frame_idx_to_frame_path_map[idx] = filename
+      frame_path_to_frame_idx_map[filename] = idx
+      idx += 1
+    video_to_frame_indices_map[dirpath] = video_indices
+
+  return filepaths, video_to_frame_indices_map, frame_idx_to_frame_path_map, frame_path_to_frame_idx_map
+
+filenames, _, _, frame_path_to_frame_idx_map = get_images_metadata()
 
 def get_image_size():
   image = Image.open(filenames[0])
