@@ -45,8 +45,8 @@ scaled_img_height = base_img_height * img_upscale
 
 preview_x = 1400
 preview_y = 200
-max_previes_width = screen_width - preview_x - 20
-max_previes_height = screen_height - preview_y - 20
+max_preview_width = screen_width - preview_x - 20
+max_preview_height = screen_height - preview_y - 20
 
 def mouse_pos():
   x, y = dpg.get_mouse_pos()
@@ -150,15 +150,31 @@ def mouse_down_callback(sender, app_data):
     )
     
 def get_image_section(filename, coords, upscale=False):
+  # swap coords so that the first point has lower coords than the second
+  x1, y1, x2, y2 = coords
+  if x1 > x2:
+    x1, x2 = x2, x1
+  if y1 > y2:
+    y1, y2 = y2, y1
   image = Image.open(filename)
-  section = image.crop(coords)
+  section = image.crop((x1, y1, x2, y2))
+
+  width = section.width
+  height = section.height
 
   # upscale the image
   if upscale:
-    width = section.width * img_upscale
-    height = section.height * img_upscale
-    section = section.resize((width, height))
+    width *= img_upscale
+    height *= img_upscale
 
+  # resize the preview to fit in the screen
+  reduction_factor = 1
+  if width > max_preview_width:
+    reduction_factor = max_preview_width / width
+  if max_preview_height / height < reduction_factor:
+    reduction_factor = max_preview_height / height
+
+  section = section.resize((math.floor(width * reduction_factor), math.floor(height * reduction_factor)))
   return section
 
 def mouse_release_callback(sender, app_data):
