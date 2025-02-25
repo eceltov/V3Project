@@ -98,11 +98,9 @@ def get_image_section(filename, coords):
 # goes through unfinished jobs and creates new features for them
 # the features are created from rectangular segments of the dataset images, defined by the "rect" job property
 def process_jobs():
-  import open_clip
   import torch
   import torch.nn.functional as F
 
-  dataset_path = get_config()["datasetPath"]
   model, preprocess, _ = get_model_preprocess_tokenizer()
 
   filepaths, _, _, _ = get_images_metadata()

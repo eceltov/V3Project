@@ -45,12 +45,19 @@ def get_2024_model():
 
   return model, preprocess, tokenizer
 
-# iterates over all images in the dataset and returns:
+metadata_cache = None
+# iterates over all frames in the dataset and returns:
 # 1. an array of absolute filepaths
 # 2. a map from video folders to their frame indices: absolute dirpath => [frame indices]
 # 3. a map: frame idx => absolute frame path
 # 4. a map: absolute frame path => frame idx
-def get_images_metadata():
+def get_MVK_metadata():
+  # caching mechanism so that all files do not have to be iterated over and over
+  global metadata_cache
+
+  if metadata_cache != None:
+    return metadata_cache
+
   dataset_path = get_config()["datasetPath"]
 
   filepaths = []
@@ -71,4 +78,5 @@ def get_images_metadata():
       idx += 1
     video_to_frame_indices_map[dirpath] = video_indices
 
-  return filepaths, video_to_frame_indices_map, frame_idx_to_frame_path_map, frame_path_to_frame_idx_map
+  metadata_cache = filepaths, video_to_frame_indices_map, frame_idx_to_frame_path_map, frame_path_to_frame_idx_map
+  return metadata_cache
