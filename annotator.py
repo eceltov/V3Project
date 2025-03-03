@@ -5,6 +5,7 @@ import numpy as np
 import random
 import math
 import json
+import sys
 
 def get_images_metadata():
   f = open("config.json", "r")
@@ -167,6 +168,9 @@ def get_image_section(filename, coords, upscale=False):
   width = section.width
   height = section.height
 
+  # do nothing if the dimensions are invalid
+  if width < 1 or height < 1:
+    return None
 
   # upscale the image
   if upscale:
@@ -194,14 +198,16 @@ def mouse_release_callback(sender, app_data):
   # set preview
   filename = dpg.get_value("filepath")
   img_section = get_image_section(filename, (x1, y1, x2, y2), upscale=True)
-  dpg_img_section = image_to_dpg(img_section)
+  if img_section != None:
+    dpg_img_section = image_to_dpg(img_section)
 
   # the program crashes when the picture has 0 area
   if abs(x1 - x2) != 0 and abs(y1 - y2) != 0:
     dpg.delete_item("img_section")
     dpg.delete_item("tex_section")
-    with dpg.texture_registry():
-      dpg.add_static_texture(width=img_section.width, height=img_section.height, default_value=dpg_img_section, tag="tex_section")
+    if img_section != None:
+      with dpg.texture_registry():
+        dpg.add_static_texture(width=img_section.width, height=img_section.height, default_value=dpg_img_section, tag="tex_section")
     dpg.add_image("tex_section", tag="img_section", pos=[preview_x, preview_y], parent=window)
 
   print(drawing_start_x, drawing_start_y, drawing_stop_x, drawing_stop_y)
@@ -232,6 +238,17 @@ def save_annotation(short, long, frameIdx, rect):
 
 img_annotations = 0
 
+def reset_annotation_state():
+  global drawing, drawing_start_x, drawing_start_y, drawing_stop_x, drawing_stop_y
+
+  drawing = False
+  drawing_start_x = 0
+  drawing_stop_x = 0
+  drawing_start_y = 0
+  drawing_stop_y = 0
+  dpg.set_value("prompt_short", "")
+  dpg.set_value("prompt_long", "")
+
 # submit the annotation
 def submit_callback():
   global img_annotations
@@ -254,15 +271,10 @@ def submit_callback():
   dpg.delete_item("rect")
   draw_rect(f"rect{img_annotations}", [0, 0, 0])
   img_annotations += 1
+  reset_annotation_state()
 
 def next_img_shortcut():
-  global drawing, drawing_start_x, drawing_start_y, drawing_stop_x, drawing_stop_y
-  # reset rectangle coordinates
-  drawing = False
-  drawing_start_x = 0
-  drawing_stop_x = 0
-  drawing_start_y = 0
-  drawing_stop_y = 0
+  reset_annotation_state()
 
   dpg.delete_item("img")
   dpg.delete_item("tex")
