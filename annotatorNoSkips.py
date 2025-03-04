@@ -5,7 +5,6 @@ import numpy as np
 import random
 import math
 import json
-import sys
 
 def get_images_metadata():
   f = open("config.json", "r")
