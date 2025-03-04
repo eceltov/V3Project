@@ -1,24 +1,40 @@
 import json
 import os
-
-device = 'cuda'
+import pickle
+from pathlib import Path
 
 def get_config():
   f = open("./config.json", "r")
   return json.loads(f.read())
 
+config = get_config()
+device = config["device"]
+dataset_path = config["datasetPath"]
+annotations_dir_path = config["annotationsDir"]
+annotation_filenames = sorted(os.listdir(annotations_dir_path))
+derived_dataset_embeddings_dir = config["derivedDatasetEmbeddingsDir"]
+
 # loads all annotation files in ./annotations and joins them into a single annotation list
 def get_annotations():
-  annotations_dir_path = './annotations'
   annotations = []
   # sort files by name to have a total ordering
-  for filename in sorted(os.listdir(annotations_dir_path)):
+  for filename in annotation_filenames:
     file_path = os.path.join(annotations_dir_path, filename)
     file = open(file_path, "r")
     content = json.loads(file.read())
     annotations += content
 
   return annotations
+
+def get_first_n_annotations(file_id, n):
+  filename = annotation_filenames[file_id]
+  file_path = os.path.join(annotations_dir_path, filename)
+  file = open(file_path, "r")
+  content = json.loads(file.read())
+  return content[:n]
+
+def get_filename_from_file_id(file_id):
+  return annotation_filenames[file_id]
 
 def get_2025_model():
   import open_clip
@@ -58,8 +74,6 @@ def get_MVK_metadata():
   if metadata_cache != None:
     return metadata_cache
 
-  dataset_path = get_config()["datasetPath"]
-
   filepaths = []
   video_to_frame_indices_map = {}
   frame_idx_to_frame_path_map = {}
@@ -80,3 +94,19 @@ def get_MVK_metadata():
 
   metadata_cache = filepaths, video_to_frame_indices_map, frame_idx_to_frame_path_map, frame_path_to_frame_idx_map
   return metadata_cache
+
+def write_pickle_file(file_path, data):
+  with open(file_path, 'wb') as handle:
+    pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+def read_pickle_file(file_path):
+  with open(file_path, 'rb') as handle:
+    return pickle.load(handle)
+
+def write_derived_dataset_embeddings(filename, data):
+  # create folder if it does not exist
+  Path(derived_dataset_embeddings_dir).mkdir(parents=True, exist_ok=True)
+  write_pickle_file(os.path.join(derived_dataset_embeddings_dir, filename), data)
+
+def read_derived_dataset_embeddings(filename):
+  return read_pickle_file(os.path.join(derived_dataset_embeddings_dir, filename))

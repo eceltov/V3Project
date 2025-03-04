@@ -31,5 +31,13 @@ def get_derived_dataset_embeddings(bounding_box):
     concat = torch.concat(embeds)
     return concat
 
-annotation = pt.get_annotations()[0]
-get_derived_dataset_embeddings(annotation["rect"])
+def process_first_n_annotations(file_id, n):
+  annotations_filename = pt.get_filename_from_file_id(file_id)
+  print(f"Processing annotations from {annotations_filename}")
+  
+  annotations = pt.get_first_n_annotations(file_id, n)
+  for annotation in annotations:
+    embeddings = get_derived_dataset_embeddings(annotation["rect"])
+    annotation_id = annotation["id"]
+    data_filename = f"{annotations_filename}_{annotation_id}"
+    pt.write_derived_dataset_embeddings(data_filename, embeddings)
