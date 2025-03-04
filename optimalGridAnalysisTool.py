@@ -1,6 +1,7 @@
 import processingTool as pt
 from PIL import Image
 import torch
+import datetime
 
 def get_frame_section(filename, coords):
   # swap coords so that the first point has lower coords than the second
@@ -41,3 +42,4 @@ def process_first_n_annotations(file_id, n):
     annotation_id = annotation["id"]
     data_filename = f"{annotations_filename}_{annotation_id}"
     pt.write_derived_dataset_embeddings(data_filename, embeddings)
+    print(f"Annotation finished at: {datetime.datetime.now()}")
