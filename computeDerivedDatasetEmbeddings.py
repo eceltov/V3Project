@@ -7,4 +7,4 @@ print(f"Job started at: {datetime.datetime.now()}")
 if len(sys.argv) != 2:
   print("Expected one argument (id of annotation file).")
 else:
-  ogat.process_first_n_annotations(int(sys.argv[1]), 20)
+  ogat.continue_processing_annotations(int(sys.argv[1]))

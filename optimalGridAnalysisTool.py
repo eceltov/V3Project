@@ -31,15 +31,22 @@ def get_derived_dataset_embeddings(bounding_box):
 
     concat = torch.concat(embeds)
     return concat
-
-def process_first_n_annotations(file_id, n):
-  annotations_filename = pt.get_filename_from_file_id(file_id)
-  print(f"Processing annotations from {annotations_filename}")
   
-  annotations = pt.get_first_n_annotations(file_id, n)
+def process_annotations(annotations, file_id):
   for annotation in annotations:
     embeddings = get_derived_dataset_embeddings(annotation["rect"])
     annotation_id = annotation["id"]
-    data_filename = f"{annotations_filename}_{annotation_id}"
-    pt.write_derived_dataset_embeddings(data_filename, embeddings)
+    pt.write_derived_dataset_embeddings(file_id, annotation_id, embeddings)
     print(f"Annotation finished at: {datetime.datetime.now()}")
+
+def process_first_n_annotations(file_id, n):
+  print(f"Processing annotations from file {file_id}")
+  annotations = pt.get_first_n_annotations(file_id, n)
+  process_annotations(annotations, file_id)
+
+def continue_processing_annotations(file_id):
+  print(f"Processing annotations from file {file_id}")
+  last_completed_annotation = pt.get_last_completed_annotation_id(file_id)
+  all_annotations = pt.get_file_annotations(file_id)
+  annotations = all_annotations[last_completed_annotation + 1:]
+  process_annotations(annotations, file_id)
