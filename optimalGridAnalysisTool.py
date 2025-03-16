@@ -45,13 +45,17 @@ def process_annotations(annotations, file_id, embed_config):
 
 def process_first_n_annotations(file_id, n, embed_config):
   print(f"Processing annotations from file {file_id}")
-  annotations = pt.get_first_n_annotations(file_id, n)
+  annotations = pt.get_first_n_annotations(file_id, n, embed_config["skippable"])
   process_annotations(annotations, file_id, embed_config)
 
 def continue_processing_annotations(file_id, embed_config):
   print(f"Processing annotations from file {file_id}")
+  if not pt.annotation_file_exists(file_id, embed_config["skippable"]):
+    print("Annotation file does not exist")
+    return
+
   last_completed_annotation = pt.get_last_completed_annotation_id(file_id, embed_config)
-  all_annotations = pt.get_file_annotations(file_id)
+  all_annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
   annotations = all_annotations[last_completed_annotation + 1:]
   process_annotations(annotations, file_id, embed_config)
 
@@ -67,7 +71,7 @@ def get_frame_rank(text, frame_idx, embeds, model, tokenizer):
     return frame_rank
   
 def get_frame_ranks(file_id, model, tokenizer, embed_config):
-  annotations = pt.get_file_annotations(file_id)
+  annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
 
   ranks_short = []
   ranks_long = []

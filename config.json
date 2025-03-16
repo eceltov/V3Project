@@ -1,7 +1,11 @@
 {
-  "datasetPath": "C:/school/MVK_tiny",
+  "datasetPath": "C:/school/videa/MVK_tiny",
   "datasetPathLinux": "/mnt/c/school/videa/MVK",
-  "annotationsDir": "../annotations",
+  "annotations": {
+    "annotationsDir": "../annotations",
+    "skippableDir": "skippable",
+    "notSkippableDir": "notSkippable"
+  },
   "device": "cuda",
   "derivedDatasetEmbeddings": {
     "mainDir": "./derivedDatasetEmbeddings",

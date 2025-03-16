@@ -10,14 +10,31 @@ def get_config():
 config = get_config()
 device = config["device"]
 dataset_path = config["datasetPath"]
-annotations_dir_path = config["annotationsDir"]
-annotation_filenames = sorted(os.listdir(annotations_dir_path))
+annotations_config = config["annotations"]
+annotations_dir_skippable = os.path.join(annotations_config["annotationsDir"], annotations_config["skippableDir"])
+annotations_dir_not_skippable = os.path.join(annotations_config["annotationsDir"], annotations_config["notSkippableDir"])
+annotation_filenames_skippable = sorted(os.listdir(annotations_dir_skippable))
+annotation_filenames_not_skippable = sorted(os.listdir(annotations_dir_not_skippable))
 derived_dataset_embeddings_config = config["derivedDatasetEmbeddings"]
 
+def get_annotation_filenames_and_dir_path(skippable):
+  if skippable:
+    annotation_filenames = annotation_filenames_skippable
+    annotations_dir_path = annotations_dir_skippable
+  else:
+    annotation_filenames = annotation_filenames_not_skippable
+    annotations_dir_path = annotations_dir_not_skippable
+  return annotation_filenames, annotations_dir_path
+
+def annotation_file_exists(file_id, skippable):
+  annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)
+  return len(annotation_filenames) > file_id
+
 # loads all annotation files in ./annotations and joins them into a single annotation list
-def get_annotations():
+def get_annotations(skippable):
   annotations = []
-  # sort files by name to have a total ordering
+  annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)
+
   for filename in annotation_filenames:
     file_path = os.path.join(annotations_dir_path, filename)
     file = open(file_path, "r")
@@ -26,17 +43,19 @@ def get_annotations():
 
   return annotations
 
-def get_file_annotations(file_id):
+def get_file_annotations(file_id, skippable):
+  annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)
   filename = annotation_filenames[file_id]
   file_path = os.path.join(annotations_dir_path, filename)
   file = open(file_path, "r")
   content = json.loads(file.read())
   return content
 
-def get_first_n_annotations(file_id, n):
-  return get_file_annotations(file_id)[:n]
+def get_first_n_annotations(file_id, n, skippable):
+  return get_file_annotations(file_id, skippable)[:n]
 
-def get_filename_from_file_id(file_id):
+def get_filename_from_file_id(file_id, skippable):
+  annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)
   return annotation_filenames[file_id]
 
 def get_2025_model():
@@ -124,13 +143,13 @@ def get_derived_dataset_embeddings_dir(embed_config):
   path = os.path.join(path, str(embed_config["model_year"]))
   return path  
 
-def get_derived_dataset_embeddings_filename(file_id, annotation_id):
-  annotations_filename = get_filename_from_file_id(file_id)
+def get_derived_dataset_embeddings_filename(file_id, annotation_id, skippable):
+  annotations_filename = get_filename_from_file_id(file_id, skippable)
   data_filename = f"{annotations_filename}_{annotation_id}"
   return data_filename
 
 def write_derived_dataset_embeddings(file_id, annotation_id, data, embed_config):
-  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id)
+  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id, embed_config["skippable"])
   # create folder if it does not exist
   derived_dataset_embeddings_dir = get_derived_dataset_embeddings_dir(embed_config)
   Path(derived_dataset_embeddings_dir).mkdir(parents=True, exist_ok=True)
@@ -138,13 +157,13 @@ def write_derived_dataset_embeddings(file_id, annotation_id, data, embed_config)
 
 def read_derived_dataset_embeddings(file_id, annotation_id, embed_config):
   derived_dataset_embeddings_dir = get_derived_dataset_embeddings_dir(embed_config)
-  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id)
+  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id, embed_config["skippable"])
   return read_pickle_file(os.path.join(derived_dataset_embeddings_dir, data_filename))
 
 # returns the id of the last annotation for the given annotations file
 # used to create a derived embeddings file
 def get_last_completed_annotation_id(file_id, embed_config):
-  annotations_filename = get_filename_from_file_id(file_id)
+  annotations_filename = get_filename_from_file_id(file_id, embed_config["skippable"])
   data_filename_prefix = f"{annotations_filename}_"
 
   # add all annotation ids of the given annotations file
@@ -168,6 +187,6 @@ def get_last_completed_annotation_id(file_id, embed_config):
 
 def does_derived_dataset_embeddings_file_exist(file_id, annotation_id, embed_config):
   derived_dataset_embeddings_dir = get_derived_dataset_embeddings_dir(embed_config)
-  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id)
+  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id, embed_config["skippable"])
   path = os.path.join(derived_dataset_embeddings_dir, data_filename)
   return os.path.exists(path)
