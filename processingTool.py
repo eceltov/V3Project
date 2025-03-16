@@ -106,15 +106,20 @@ def read_pickle_file(file_path):
   with open(file_path, 'rb') as handle:
     return pickle.load(handle)
 
-def write_derived_dataset_embeddings(file_id, annotation_id, data):
+def get_derived_dataset_embeddings_filename(file_id, annotation_id):
   annotations_filename = get_filename_from_file_id(file_id)
   data_filename = f"{annotations_filename}_{annotation_id}"
+  return data_filename
+
+def write_derived_dataset_embeddings(file_id, annotation_id, data):
+  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id)
   # create folder if it does not exist
   Path(derived_dataset_embeddings_dir).mkdir(parents=True, exist_ok=True)
   write_pickle_file(os.path.join(derived_dataset_embeddings_dir, data_filename), data)
 
-def read_derived_dataset_embeddings(filename):
-  return read_pickle_file(os.path.join(derived_dataset_embeddings_dir, filename))
+def read_derived_dataset_embeddings(file_id, annotation_id):
+  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id)
+  return read_pickle_file(os.path.join(derived_dataset_embeddings_dir, data_filename))
 
 # returns the id of the last annotation for the given annotations file
 # used to create a derived embeddings file
@@ -134,3 +139,8 @@ def get_last_completed_annotation_id(file_id):
     return -1
   
   return max(ids)
+
+def does_derived_dataset_embeddings_file_exist(file_id, annotation_id):
+  data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id)
+  path = os.path.join(derived_dataset_embeddings_dir, data_filename)
+  return os.path.exists(path)

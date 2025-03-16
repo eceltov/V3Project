@@ -1,6 +1,7 @@
 import processingTool as pt
 from PIL import Image
 import torch
+import torch.nn.functional as F
 import datetime
 
 def get_frame_section(filename, coords):
@@ -50,3 +51,34 @@ def continue_processing_annotations(file_id):
   all_annotations = pt.get_file_annotations(file_id)
   annotations = all_annotations[last_completed_annotation + 1:]
   process_annotations(annotations, file_id)
+
+def get_frame_rank(text, frame_idx, embeds, model, tokenizer):
+  query = tokenizer(text).to(pt.device)
+
+  with torch.no_grad(), torch.amp.autocast(pt.device):
+    text_embeds = model.encode_text(query)
+
+    distances = 1 - (F.normalize(text_embeds) @ F.normalize(embeds).T)
+    sorted_indices = torch.argsort(distances)[0].tolist()
+    frame_rank = sorted_indices.index(frame_idx)
+    return frame_rank
+  
+def get_frame_ranks(file_id, model, tokenizer):
+  annotations = pt.get_file_annotations(file_id)
+
+  ranks_short = []
+  ranks_long = []
+  for annotation in annotations:
+    annotation_id = annotation["id"]
+
+    # skip if the embeddings file does not exist
+    if not pt.does_derived_dataset_embeddings_file_exist(file_id, annotation_id):
+      continue
+
+    frame_idx = annotation["frameIdx"]
+    desc_short = annotation["desc_short"]
+    desc_long = annotation["desc_long"]
+    embeds = pt.read_derived_dataset_embeddings(file_id, annotation_id).to(pt.device)
+    rank_short = get_frame_rank(desc_short, frame_idx, embeds, model, tokenizer)
+    rank_long = get_frame_rank(desc_long, frame_idx, embeds, model, tokenizer)
+    print(rank_short, rank_long)
