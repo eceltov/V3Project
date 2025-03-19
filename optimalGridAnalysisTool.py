@@ -54,7 +54,11 @@ def continue_processing_annotations(file_id, embed_config):
     print("Annotation file does not exist")
     return
 
+  # limit to 20 per kind
   last_completed_annotation = pt.get_last_completed_annotation_id(file_id, embed_config)
+  if last_completed_annotation >= 19:
+    return
+
   all_annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
   annotations = all_annotations[last_completed_annotation + 1:]
   process_annotations(annotations, file_id, embed_config)
