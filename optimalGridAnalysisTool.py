@@ -60,7 +60,7 @@ def continue_processing_annotations(file_id, embed_config):
     return
 
   all_annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
-  annotations = all_annotations[last_completed_annotation + 1:]
+  annotations = all_annotations[last_completed_annotation + 1 : 20]
   process_annotations(annotations, file_id, embed_config)
 
 def get_frame_rank(text, frame_idx, embeds, model, tokenizer):
