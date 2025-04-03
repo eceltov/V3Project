@@ -1,5 +1,5 @@
 {
-  "datasetPath": "C:/school/videa/MVK_tiny",
+  "datasetPath": "C:/school/MVK",
   "datasetPathLinux": "/mnt/c/school/videa/MVK",
   "annotations": {
     "annotationsDir": "../annotations",
@@ -13,5 +13,8 @@
     "notSkippableDir": "notSkippable",
     "originalBoundingBoxDir": "originalBoundingBox",
     "enlargedBoundingBoxDir": "enlargedBoundingBox"
-  }
+  },
+  "frameWidth": 682,
+  "frameHeight": 384,
+  "boxEnlargementStep": 30
 }

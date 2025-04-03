@@ -5,13 +5,7 @@ import torch.nn.functional as F
 import datetime
 
 def get_frame_section(filename, coords):
-  # swap coords so that the first point has lower coords than the second
   x1, y1, x2, y2 = coords
-  if x1 > x2:
-    x1, x2 = x2, x1
-  if y1 > y2:
-    y1, y2 = y2, y1
-
   frame = Image.open(filename)
   section = frame.crop((x1, y1, x2, y2))
   return section
@@ -35,10 +29,12 @@ def get_derived_dataset_embeddings(bounding_box, embed_config):
 
     concat = torch.concat(embeds)
     return concat
-  
+
 def process_annotations(annotations, file_id, embed_config):
   for annotation in annotations:
-    embeddings = get_derived_dataset_embeddings(annotation["rect"], embed_config)
+    # apply enlargement to the rect if any
+    rect = pt.get_annotation_rect(annotation, embed_config)
+    embeddings = get_derived_dataset_embeddings(rect, embed_config)
     annotation_id = annotation["id"]
     pt.write_derived_dataset_embeddings(file_id, annotation_id, embeddings, embed_config)
     print(f"Annotation finished at: {datetime.datetime.now()}")

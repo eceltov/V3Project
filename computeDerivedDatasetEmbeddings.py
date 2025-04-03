@@ -10,7 +10,7 @@ if len(sys.argv) != 2:
 else:
   embed_config = {
     "skippable": False,
-    "original_bounding_box": True,
+    "box_enlargements": 0,
     "model_year": 2025
   }
 

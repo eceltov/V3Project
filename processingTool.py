@@ -16,6 +16,9 @@ annotations_dir_not_skippable = os.path.join(annotations_config["annotationsDir"
 annotation_filenames_skippable = sorted(os.listdir(annotations_dir_skippable))
 annotation_filenames_not_skippable = sorted(os.listdir(annotations_dir_not_skippable))
 derived_dataset_embeddings_config = config["derivedDatasetEmbeddings"]
+frame_width = config["frameWidth"]
+frame_height = config["frameHeight"]
+box_enlargement_step = config["boxEnlargementStep"]
 
 def get_annotation_filenames_and_dir_path(skippable):
   if skippable:
@@ -117,6 +120,23 @@ def get_MVK_metadata():
   metadata_cache = filepaths, video_to_frame_indices_map, frame_idx_to_frame_path_map, frame_path_to_frame_idx_map
   return metadata_cache
 
+# swaps rect coords so that the first point has all dimensions lower than the second
+# also applies embed_config enlargement
+def get_annotation_rect(annotation, embed_config):
+  # swap coords so that the first point has lower coords than the second
+  x1, y1, x2, y2 = annotation["rect"]
+  if x1 > x2:
+    x1, x2 = x2, x1
+  if y1 > y2:
+    y1, y2 = y2, y1
+
+  enlargement = box_enlargement_step * embed_config["box_enlargements"]
+  x1 = max(0, x1 - enlargement)
+  y1 = max(0, y1 - enlargement)
+  x2 = min(frame_width, x2 + enlargement)
+  y2 = min(frame_height, y2 + enlargement)
+  return [x1, y1, x2, y2]
+
 def write_pickle_file(file_path, data):
   with open(file_path, 'wb') as handle:
     pickle.dump(data, handle, protocol=pickle.HIGHEST_PROTOCOL)
@@ -134,10 +154,12 @@ def get_derived_dataset_embeddings_dir(embed_config):
     path = os.path.join(path, derived_dataset_embeddings_config["notSkippableDir"])
 
   # whether the bounding boxes are the original ones drawn by the annotator
-  if embed_config["original_bounding_box"]:
+  box_enlargements = embed_config["box_enlargements"]
+  if box_enlargements == 0:
     path = os.path.join(path, derived_dataset_embeddings_config["originalBoundingBoxDir"])
   else:
-    path = os.path.join(path, derived_dataset_embeddings_config["enlargedBoundingBoxDir"])
+    folder_name = derived_dataset_embeddings_config["enlargedBoundingBoxDir"] + str(box_enlargements)
+    path = os.path.join(path, folder_name)
     
   # add model year
   path = os.path.join(path, str(embed_config["model_year"]))
