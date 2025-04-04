@@ -1,27 +1,25 @@
 import sys
-import optimalGridAnalysisTool as ogat
 import datetime
+import optimalGridAnalysisTool as ogat
+from optimalGridJobScheduler import OptimalGridJobScheduler as Scheduler
+
+annotations_per_config = 20
+enlargements = 2
+
+# prints remaining task count for each job
+def debug_print_task_counts():
+  job_count = int(sys.argv[2])
+  for job_id in range(job_count):
+    scheduler = Scheduler(annotations_per_config, enlargements, job_id, job_count)
+    scheduler.debug_print_remaining_task_count()
 
 print(f"Job started at: {datetime.datetime.now()}")
 
-
-if len(sys.argv) != 2:
-  print("Expected one argument (id of annotation file).")
+if len(sys.argv) != 3:
+  print("Expected two arguments (job ID and number of jobs).")
 else:
-  embed_config = {
-    "skippable": False,
-    "box_enlargements": 0,
-    "model_year": 2025
-  }
+  job_id = int(sys.argv[1])
+  job_count = int(sys.argv[2])
 
-  ogat.continue_processing_annotations(int(sys.argv[1]), embed_config)
-  embed_config["skippable"] = True
-  ogat.continue_processing_annotations(int(sys.argv[1]), embed_config)
-  embed_config["model_year"] = 2024
-  ogat.continue_processing_annotations(int(sys.argv[1]), embed_config)
-  embed_config["skippable"] = False
-  ogat.continue_processing_annotations(int(sys.argv[1]), embed_config)
-
-# import processingTool as pt
-# model, preprocess, tokenizer = pt.get_2025_model()
-# ogat.get_frame_ranks(0, model, tokenizer)
+  scheduler = Scheduler(annotations_per_config, enlargements, job_id, job_count)
+  scheduler.do_tasks()

@@ -57,6 +57,9 @@ def get_file_annotations(file_id, skippable):
 def get_first_n_annotations(file_id, n, skippable):
   return get_file_annotations(file_id, skippable)[:n]
 
+def get_annotation(file_id, annotation_id, skippable):
+  return get_file_annotations(file_id, skippable)[annotation_id]
+
 def get_filename_from_file_id(file_id, skippable):
   annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)
   return annotation_filenames[file_id]
@@ -206,6 +209,27 @@ def get_last_completed_annotation_id(file_id, embed_config):
     return -1
   
   return max(ids)
+
+# returns a list of completed annotation ids for the given annotation file
+def get_completed_annotation_ids(file_id, embed_config):
+  annotations_filename = get_filename_from_file_id(file_id, embed_config["skippable"])
+  data_filename_prefix = f"{annotations_filename}_"
+
+  # add all annotation ids of the given annotations file
+  ids = []
+  derived_dataset_embeddings_dir = get_derived_dataset_embeddings_dir(embed_config)
+
+  # check if folder exists
+  if not os.path.exists(derived_dataset_embeddings_dir):
+    return []
+  
+  for filename in os.listdir(derived_dataset_embeddings_dir):
+    if filename.startswith(data_filename_prefix):
+      annotation_id = filename[len(data_filename_prefix):]
+      ids.append(int(annotation_id))
+  
+  return ids
+
 
 def does_derived_dataset_embeddings_file_exist(file_id, annotation_id, embed_config):
   derived_dataset_embeddings_dir = get_derived_dataset_embeddings_dir(embed_config)
