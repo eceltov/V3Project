@@ -230,9 +230,14 @@ def get_completed_annotation_ids(file_id, embed_config):
   
   return ids
 
-
 def does_derived_dataset_embeddings_file_exist(file_id, annotation_id, embed_config):
   derived_dataset_embeddings_dir = get_derived_dataset_embeddings_dir(embed_config)
   data_filename = get_derived_dataset_embeddings_filename(file_id, annotation_id, embed_config["skippable"])
   path = os.path.join(derived_dataset_embeddings_dir, data_filename)
   return os.path.exists(path)
+
+# creates a key path in a dictionary, if not set already, and returns the leaf dictionary
+def make_dict_path(dict: dict, *keys: str):
+  for key in keys:
+    dict = dict.setdefault(key, {})
+  return dict
