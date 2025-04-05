@@ -11,10 +11,7 @@ def get_frame_section(filename, coords):
   return section
 
 def get_derived_dataset_embeddings(bounding_box, embed_config):
-  if embed_config["model_year"] == 2025:
-    model, preprocess, _ = pt.get_2025_model()
-  else:
-    model, preprocess, _ = pt.get_2024_model()
+  model, preprocess, _ = pt.get_model(embed_config["model_year"])
   filepaths, _, _, _ = pt.get_MVK_metadata()
 
   embeds = []
@@ -74,11 +71,10 @@ def get_frame_rank(text, frame_idx, embeds, model, tokenizer):
     frame_rank = sorted_indices.index(frame_idx)
     return frame_rank
   
-def get_frame_ranks(file_id, model, tokenizer, embed_config):
+def get_file_results(file_id, model, tokenizer, embed_config):
   annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
 
-  ranks_short = []
-  ranks_long = []
+  result_list = []
   for annotation in annotations:
     annotation_id = annotation["id"]
 
@@ -92,4 +88,10 @@ def get_frame_ranks(file_id, model, tokenizer, embed_config):
     embeds = pt.read_derived_dataset_embeddings(file_id, annotation_id, embed_config).to(pt.device)
     rank_short = get_frame_rank(desc_short, frame_idx, embeds, model, tokenizer)
     rank_long = get_frame_rank(desc_long, frame_idx, embeds, model, tokenizer)
-    print(rank_short, rank_long)
+    result_list.append({
+      "rank_short": rank_short,
+      "rank_long": rank_long,
+    })
+    print("#", end="", flush=True)
+
+  return result_list

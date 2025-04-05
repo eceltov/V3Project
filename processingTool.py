@@ -64,6 +64,7 @@ def get_filename_from_file_id(file_id, skippable):
   annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)
   return annotation_filenames[file_id]
 
+
 def get_2025_model():
   import open_clip
   import torch
@@ -88,6 +89,13 @@ def get_2024_model():
   tokenizer = open_clip.get_tokenizer('hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K')
 
   return model, preprocess, tokenizer
+
+def get_model(year: str):
+  if year == "2024":
+    return get_2024_model()
+  elif year == "2025":
+    return get_2025_model()
+  raise KeyError(f"Year '{year}' not found among models.")
 
 metadata_cache = None
 # iterates over all frames in the dataset and returns:
