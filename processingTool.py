@@ -241,3 +241,38 @@ def make_dict_path(dict: dict, *keys: str):
   for key in keys:
     dict = dict.setdefault(key, {})
   return dict
+
+# returns a list of all evaluated embedding configurations
+def get_used_embed_configs():
+  return [
+    {
+      "skippable": False,
+      "box_enlargements": 0,
+      "model_year": "2025"
+    },
+    {
+      "skippable": False,
+      "box_enlargements": 0,
+      "model_year": "2024"
+    },
+    {
+      "skippable": True,
+      "box_enlargements": 0,
+      "model_year": "2025"
+    },
+    {
+      "skippable": True,
+      "box_enlargements": 0,
+      "model_year": "2024"
+    },
+    {
+      "skippable": False,
+      "box_enlargements": 1,
+      "model_year": "2025"
+    },
+    {
+      "skippable": False,
+      "box_enlargements": 2,
+      "model_year": "2025"
+    },
+  ]  

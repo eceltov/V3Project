@@ -2,10 +2,9 @@ import processingTool as pt
 import optimalGridAnalysisTool as ogat
 
 class OptimalGridJobScheduler:
-  def __init__(self, annotations_per_config, enlargements, job_id, job_count):
+  def __init__(self, annotations_per_config, job_id, job_count):
     # how many annotations to process from the file for each configuration
     self.annotations_per_config = annotations_per_config
-    self.enlargements = enlargements
     self.job_id = job_id
     self.job_count = job_count
 
@@ -30,25 +29,8 @@ class OptimalGridJobScheduler:
     self.annotation_file_counts[False] = len(annotation_filenames_not_skippable)
 
   def __init_tasks(self):
-    embed_config = {
-      "skippable": False,
-      "box_enlargements": 0,
-      "model_year": 2025
-    }
-
-    # submit enlargement jobs
-    for i in range(self.enlargements):
-      embed_config["box_enlargements"] = i + 1
+    for embed_config in pt.get_used_embed_configs():
       self.__append_tasks(embed_config)
-    embed_config["box_enlargements"] = 0
-
-    self.__append_tasks(embed_config)
-    embed_config["skippable"] = True
-    self.__append_tasks(embed_config)
-    embed_config["model_year"] = 2024
-    self.__append_tasks(embed_config)
-    embed_config["skippable"] = False
-    self.__append_tasks(embed_config)
 
   # appends the remaining_tasks and all_tasks dictionaries with tasks matching the configuration
   def __append_tasks(self, embed_config):
