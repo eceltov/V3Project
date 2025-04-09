@@ -14,7 +14,7 @@ def append_optimal_grid_results(results: ResultAggregator):
       model, _, tokenizer = pt.get_model(embed_config["model_year"])
       for file_id in range(len(filenames[embed_config["skippable"]])):
         file_results = ogat.get_file_results(file_id, model, tokenizer, embed_config)
-        results.append_file(embed_config, file_id, file_results)
+        results.append_file_optimal(embed_config, file_id, file_results)
         print(".", end="", flush=True)
 
 results = ResultAggregator()

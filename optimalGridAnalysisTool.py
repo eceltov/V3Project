@@ -1,8 +1,9 @@
-import processingTool as pt
 from PIL import Image
 import torch
 import torch.nn.functional as F
 import datetime
+import processingTool as pt
+import rankCalculations as rc
 
 def get_frame_section(filename, coords):
   x1, y1, x2, y2 = coords
@@ -59,17 +60,6 @@ def continue_processing_annotations(file_id, embed_config):
   all_annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
   annotations = all_annotations[last_completed_annotation + 1 : 20]
   process_annotations(annotations, file_id, embed_config)
-
-def get_frame_rank(text, frame_idx, embeds, model, tokenizer):
-  query = tokenizer(text).to(pt.device)
-
-  with torch.no_grad(), torch.amp.autocast(pt.device):
-    text_embeds = model.encode_text(query)
-
-    distances = 1 - (F.normalize(text_embeds) @ F.normalize(embeds).T)
-    sorted_indices = torch.argsort(distances)[0].tolist()
-    frame_rank = sorted_indices.index(frame_idx)
-    return frame_rank
   
 def get_file_results(file_id, model, tokenizer, embed_config):
   annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
@@ -86,8 +76,8 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     desc_short = annotation["desc_short"]
     desc_long = annotation["desc_long"]
     embeds = pt.read_derived_dataset_embeddings(file_id, annotation_id, embed_config).to(pt.device)
-    rank_short = get_frame_rank(desc_short, frame_idx, embeds, model, tokenizer)
-    rank_long = get_frame_rank(desc_long, frame_idx, embeds, model, tokenizer)
+    rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds, model, tokenizer)
+    rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds, model, tokenizer)
     result_list.append({
       "rank_short": rank_short,
       "rank_long": rank_long,
