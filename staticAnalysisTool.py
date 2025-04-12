@@ -2,7 +2,7 @@ import torch
 import processingTool as pt
 import rankCalculations as rc
 import boundaries
-import iou
+import rectangles
 
 # returns a list of tensors, where each tensor represents a section defined by a boundary
 def extract_embeddings(model_year, get_boundaries_callback):
@@ -60,7 +60,7 @@ def get_file_results(file_id, model, tokenizer, embed_config, kind):
     frame_rect = annotation["rect"]
     desc_short = annotation["desc_short"]
     desc_long = annotation["desc_long"]
-    segment_idx, IoU = iou.get_best_IoU_segment_idx(frame_rect, segment_rects)
+    segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
   
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[segment_idx], model, tokenizer)
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[segment_idx], model, tokenizer)

@@ -2,6 +2,7 @@ import json
 import os
 import pickle
 from pathlib import Path
+import rectangles
 
 def get_config():
   f = open("./config.json", "r")
@@ -132,18 +133,9 @@ def get_MVK_metadata():
   metadata_cache = filepaths, video_to_frame_indices_map, frame_idx_to_frame_path_map, frame_path_to_frame_idx_map
   return metadata_cache
 
-# swaps rect coords so that the first point has all dimensions lower than the second
-def normalize_rectangle(rect):
-  x1, y1, x2, y2 = rect
-  if x1 > x2:
-    x1, x2 = x2, x1
-  if y1 > y2:
-    y1, y2 = y2, y1
-  return [x1, y1, x2, y2]
-
 def get_annotation_rect(annotation, embed_config):
   # swap coords so that the first point has lower coords than the second
-  x1, y1, x2, y2 = normalize_rectangle(annotation["rect"])
+  x1, y1, x2, y2 = rectangles.normalize(annotation["rect"])
 
   enlargement = box_enlargement_step * embed_config["box_enlargements"]
   x1 = max(0, x1 - enlargement)

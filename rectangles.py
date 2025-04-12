@@ -1,9 +1,16 @@
-import processingTool as pt
+# swaps rect coords so that the first point has all dimensions lower than the second
+def normalize(rect):
+  x1, y1, x2, y2 = rect
+  if x1 > x2:
+    x1, x2 = x2, x1
+  if y1 > y2:
+    y1, y2 = y2, y1
+  return [x1, y1, x2, y2]
 
 def get_IoU(rect1, rect2):
   # normalize coords
-  rect1 = pt.normalize_rectangle(rect1)
-  rect2 = pt.normalize_rectangle(rect2)
+  rect1 = normalize(rect1)
+  rect2 = normalize(rect2)
 
   # compute intersection area
   x_left = max(rect1[0], rect2[0])
@@ -34,3 +41,7 @@ def get_best_IoU_segment_idx(rect, segment_rects):
       best_segment_idx = segment_idx
 
   return best_segment_idx, best_IoU
+
+def get_area(rect):
+  x1, y1, x2, y2 = normalize(rect)
+  return (x2 - x1) * (y2 - y1)

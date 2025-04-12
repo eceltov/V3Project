@@ -4,6 +4,7 @@ import torch.nn.functional as F
 import datetime
 import processingTool as pt
 import rankCalculations as rc
+import rectangles
 
 def get_frame_section(filename, coords):
   x1, y1, x2, y2 = coords
@@ -75,12 +76,14 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     frame_idx = annotation["frameIdx"]
     desc_short = annotation["desc_short"]
     desc_long = annotation["desc_long"]
+    rect = pt.get_annotation_rect(annotation, embed_config)
     embeds = pt.read_derived_dataset_embeddings(file_id, annotation_id, embed_config).to(pt.device)
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds, model, tokenizer)
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds, model, tokenizer)
     result_list.append({
       "rank_short": rank_short,
       "rank_long": rank_long,
+      "area": rectangles.get_area(rect),
     })
     print("#", end="", flush=True)
 
