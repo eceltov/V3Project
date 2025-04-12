@@ -12,10 +12,84 @@
     "skippableDir": "skippable",
     "notSkippableDir": "notSkippable",
     "originalBoundingBoxDir": "originalBoundingBox",
-    "enlargedBoundingBoxDir": "enlargedBoundingBox"
+    "enlargedBoundingBoxDir": "enlargedBoundingBox",
+    "embedConfigs": [
+      {
+        "skippable": false,
+        "box_enlargements": 0,
+        "model_year": "2025"
+      },
+      {
+        "skippable": false,
+        "box_enlargements": 0,
+        "model_year": "2024"
+      },
+      {
+        "skippable": true,
+        "box_enlargements": 0,
+        "model_year": "2025"
+      },
+      {
+        "skippable": true,
+        "box_enlargements": 0,
+        "model_year": "2024"
+      },
+      {
+        "skippable": false,
+        "box_enlargements": 1,
+        "model_year": "2025"
+      },
+      {
+        "skippable": false,
+        "box_enlargements": 2,
+        "model_year": "2025"
+      }
+    ]  
   },
   "staticEmbeddings": {
-    "mainDir": "./staticEmbeddings"
+    "mainDir": "./staticEmbeddings",
+    "embedConfigs": [
+      {
+        "skippable": false,
+        "kind": "centerpiece_overlap",
+        "model_year": "2025"
+      },
+      {
+        "skippable": false,
+        "box_enlargements": "centerpiece_overlap",
+        "model_year": "2024"
+      },
+      {
+        "skippable": true,
+        "box_enlargements": "centerpiece_overlap",
+        "model_year": "2025"
+      },
+      {
+        "skippable": true,
+        "box_enlargements": "centerpiece_overlap",
+        "model_year": "2024"
+      },
+          {
+        "skippable": false,
+        "kind": "whole",
+        "model_year": "2025"
+      },
+      {
+        "skippable": false,
+        "box_enlargements": "whole",
+        "model_year": "2024"
+      },
+      {
+        "skippable": true,
+        "box_enlargements": "whole",
+        "model_year": "2025"
+      },
+      {
+        "skippable": true,
+        "box_enlargements": "whole",
+        "model_year": "2024"
+      }
+    ]
   },
   "frameWidth": 682,
   "frameHeight": 384,
