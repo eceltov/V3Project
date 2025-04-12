@@ -18,7 +18,7 @@ def append_optimal_grid_results(results: ResultAggregator):
         results.append_file_optimal(embed_config, file_id, file_results)
         print(".", end="", flush=True)
 
-def append_optimal_grid_results(results: ResultAggregator):
+def append_static_grid_results(results: ResultAggregator):
   for embed_config in pt.get_static_embed_configs():
     model, _, tokenizer = pt.get_model(embed_config["model_year"])
     for file_id in range(len(filenames[embed_config["skippable"]])):
@@ -28,6 +28,7 @@ def append_optimal_grid_results(results: ResultAggregator):
 
 results = ResultAggregator()
 append_optimal_grid_results(results)
+append_static_grid_results(results)
 print()
 print(results)
 print(results.results)
