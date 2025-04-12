@@ -43,9 +43,9 @@ def save_whole_embeddings(model_year):
   embeddings = extract_embeddings(model_year, get_boundaries_callback)
   pt.write_static_embeddings(model_year, "whole", embeddings)
 
-def get_file_results(file_id, model, tokenizer, embed_config, kind):
+def get_file_results(file_id, model, tokenizer, embed_config):
   annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
-  embeds = pt.read_static_embeddings(embed_config["model_year"], kind).to(pt.device)
+  embeds = pt.read_static_embeddings(embed_config["model_year"], embed_config["kind"]).to(pt.device)
   segment_rects = boundaries.get_corner_and_centerpiece_overlap_boundaries(pt.frame_width, pt.frame_height)
 
   result_list = []

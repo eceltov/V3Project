@@ -262,7 +262,7 @@ def make_dict_path(dict: dict, *keys: str):
   return dict
 
 # returns a list of all evaluated embedding configurations
-def get_used_embed_configs():
+def get_optimal_embed_configs():
   return [
     {
       "skippable": False,
@@ -293,5 +293,49 @@ def get_used_embed_configs():
       "skippable": False,
       "box_enlargements": 2,
       "model_year": "2025"
+    },
+  ]  
+
+def get_static_embed_configs():
+  return [
+    {
+      "skippable": False,
+      "kind": "centerpiece_overlap",
+      "model_year": "2025"
+    },
+    {
+      "skippable": False,
+      "box_enlargements": "centerpiece_overlap",
+      "model_year": "2024"
+    },
+    {
+      "skippable": True,
+      "box_enlargements": "centerpiece_overlap",
+      "model_year": "2025"
+    },
+    {
+      "skippable": True,
+      "box_enlargements": "centerpiece_overlap",
+      "model_year": "2024"
+    },
+        {
+      "skippable": False,
+      "kind": "whole",
+      "model_year": "2025"
+    },
+    {
+      "skippable": False,
+      "box_enlargements": "whole",
+      "model_year": "2024"
+    },
+    {
+      "skippable": True,
+      "box_enlargements": "whole",
+      "model_year": "2025"
+    },
+    {
+      "skippable": True,
+      "box_enlargements": "whole",
+      "model_year": "2024"
     },
   ]  

@@ -29,7 +29,7 @@ class OptimalGridJobScheduler:
     self.annotation_file_counts[False] = len(annotation_filenames_not_skippable)
 
   def __init_tasks(self):
-    for embed_config in pt.get_used_embed_configs():
+    for embed_config in pt.get_optimal_embed_configs():
       self.__append_tasks(embed_config)
 
   # appends the remaining_tasks and all_tasks dictionaries with tasks matching the configuration
