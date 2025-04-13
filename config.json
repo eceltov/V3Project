@@ -43,6 +43,16 @@
         "skippable": false,
         "box_enlargements": 2,
         "model_year": "2025"
+      },
+      {
+        "skippable": false,
+        "box_enlargements": 3,
+        "model_year": "2025"
+      },
+      {
+        "skippable": false,
+        "box_enlargements": 4,
+        "model_year": "2025"
       }
     ]  
   },
