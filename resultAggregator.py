@@ -1,27 +1,16 @@
-import processingTool as pt
+import pandas as pd
+from pathlib import Path
 
 class ResultAggregator():
   def __init__(self):
-    # the dict is structured as follows: Skippable->Enlargements->ModelYear->FileID->AnnotationID->ResultDict
-    self.results_optimal: dict[bool, dict[int, dict[str, dict[int, dict[int, dict]]]]] = {}
-    self.results_static: dict[bool, dict[str, dict[str, dict[int, dict[int, dict]]]]] = {}
+    self.results: list[dict] = []
 
-  def append_file_optimal(self, embed_config, file_id, result_dict_list):
-    # create path in dict if not present already
-    file_dict = pt.make_dict_path(
-      self.results_optimal,
-      embed_config["skippable"],
-      embed_config["box_enlargements"],
-      embed_config["model_year"],
-    )
-    file_dict[file_id] = result_dict_list
+  def append_results(self, result_list):
+    for result in result_list:
+      self.results.append(result)
 
-  def append_file_static(self, embed_config, file_id, result_dict_list):
-    # create path in dict if not present already
-    file_dict = pt.make_dict_path(
-      self.results_static,
-      embed_config["skippable"],
-      embed_config["kind"],
-      embed_config["model_year"],
-    )
-    file_dict[file_id] = result_dict_list
+  def to_csv(self, filepath):
+    # create containing folder
+    Path(filepath).parent.mkdir(parents=True, exist_ok=True)
+    df = pd.DataFrame(self.results)
+    df.to_csv(filepath)

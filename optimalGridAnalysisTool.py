@@ -81,6 +81,12 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds, model, tokenizer)
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds, model, tokenizer)
     result_list.append({
+      "file_id": file_id,
+      "annotation_id": annotation_id,
+      "skippable": embed_config["skippable"],
+      "box_enlargements": embed_config["box_enlargements"],
+      "model_year": embed_config["model_year"],
+      "frame_idx": frame_idx,
       "rank_short": rank_short,
       "rank_long": rank_long,
       "area": rectangles.get_area(rect),

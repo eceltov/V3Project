@@ -13,6 +13,7 @@
     "notSkippableDir": "notSkippable",
     "originalBoundingBoxDir": "originalBoundingBox",
     "enlargedBoundingBoxDir": "enlargedBoundingBox",
+    "csvPath": "./results/optimalResults.csv",
     "embedConfigs": [
       {
         "skippable": false,
@@ -58,6 +59,7 @@
   },
   "staticEmbeddings": {
     "mainDir": "./staticEmbeddings",
+    "csvPath": "./results/staticResults.csv",
     "embedConfigs": [
       {
         "skippable": false,
