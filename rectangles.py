@@ -1,3 +1,6 @@
+from sklearn.cluster import KMeans
+import math
+
 # swaps rect coords so that the first point has all dimensions lower than the second
 def normalize(rect):
   x1, y1, x2, y2 = rect
@@ -45,3 +48,72 @@ def get_best_IoU_segment_idx(rect, segment_rects):
 def get_area(rect):
   x1, y1, x2, y2 = normalize(rect)
   return (x2 - x1) * (y2 - y1)
+
+def get_centerpoint(rect):
+  x1, y1, x2, y2 = rect
+  x = (x1 + x2) // 2
+  y = (y1 + y2) // 2
+  return (x, y)
+
+# returns kmeans centroids and lists of rects aligned to the centroids 
+def get_centroids_and_sorted_rects(rects, k):
+  centres = [get_centerpoint(rect) for rect in rects]
+  kmeans = KMeans(n_clusters=k, n_init=10)
+  kmeans.fit(centres)
+  centroids = kmeans.cluster_centers_
+  labels = kmeans.labels_
+
+  sorted_rects = [[] for _ in range(k)]
+  for i in range(len(labels)):
+    label = labels[i]
+    rect = rects[i]
+    sorted_rects[label].append(rect)
+
+  return centroids, sorted_rects
+
+# returns a rect centered on a centroid with a shame derived from the input rects
+def get_representing_rect(centroid, rects, representing_rect_area):
+  width_sum = 0
+  height_sum = 0
+  for rect in rects:
+    x1, y1, x2, y2 = rect
+    width_sum += abs(x2 - x1)
+    height_sum += abs(y2 - y1)
+  area = width_sum * height_sum
+
+  # by how much should the area decrease
+  area_decrease_factor = area / representing_rect_area
+  side_decrease_factor = math.sqrt(area_decrease_factor)
+
+  representing_rect_width = width_sum // side_decrease_factor
+  representing_rect_height = height_sum // side_decrease_factor
+
+  center_x, center_y = centroid
+  x1 = center_x - representing_rect_width // 2
+  y1 = center_y - representing_rect_height // 2
+  x2 = x1 + representing_rect_width
+  y2 = y1 + representing_rect_height
+
+  return [x1, y1, x2, y2]
+
+# shifts the rectangle into input confines if possible
+def confine_to_area(width, height, rect):
+  x1, y1, x2, y2 = rect
+  if x1 < 0:
+    delta = -x1
+    x1 += delta
+    x2 += delta
+  if y1 < 0:
+    delta = -y1
+    y1 += delta
+    y2 += delta
+  if x2 > width:
+    delta = x2 - width
+    x1 -= delta
+    x2 -= delta
+  if y2 > height:
+    delta = y2 - height
+    y1 -= delta
+    y2 -= delta
+
+  return [x1, y1, x2, y2]
