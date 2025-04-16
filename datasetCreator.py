@@ -1,8 +1,8 @@
-import processingTool as pt
+import lib.processingTool as pt
 import pandas as pd
-from resultAggregator import ResultAggregator
-import optimalGridAnalysisTool as ogat
-import staticAnalysisTool as sat
+from lib.resultAggregator import ResultAggregator
+import lib.optimalGridAnalysisTool as ogat
+import lib.staticAnalysisTool as sat
 
 skippable_filenames, _ = pt.get_annotation_filenames_and_dir_path(True)
 not_skippable_filenames, _ = pt.get_annotation_filenames_and_dir_path(False)
@@ -54,4 +54,4 @@ def save_static_grid_results():
       print(".", end="", flush=True)
   results.to_csv(pt.static_csv_path)
 
-save_optimal_grid_results()
+save_annotations()

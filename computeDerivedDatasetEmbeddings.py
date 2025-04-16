@@ -1,8 +1,8 @@
 import sys
 import datetime
-import optimalGridAnalysisTool as ogat
-from optimalGridJobScheduler import OptimalGridJobScheduler as Scheduler
+from lib.optimalGridJobScheduler import OptimalGridJobScheduler as Scheduler
 
+# how many annotations should be processed from a single annotation file
 annotations_per_config = 20
 
 # prints remaining task count for each job

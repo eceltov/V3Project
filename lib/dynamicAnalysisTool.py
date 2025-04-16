@@ -1,8 +1,8 @@
 import torch
-import processingTool as pt
-import rankCalculations as rc
-import boundaries
-import rectangles
+import lib.processingTool as pt
+import lib.rankCalculations as rc
+import lib.boundaries as boundaries
+import lib.rectangles as rectangles
 
 def get_representing_rects(rects, kmeans_k, representing_rect_area):
   centroids, sorted_rects = rectangles.get_centroids_and_sorted_rects(rects, kmeans_k)

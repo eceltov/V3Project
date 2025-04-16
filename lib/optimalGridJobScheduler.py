@@ -1,5 +1,5 @@
-import processingTool as pt
-import optimalGridAnalysisTool as ogat
+import lib.processingTool as pt
+import lib.optimalGridAnalysisTool as ogat
 
 class OptimalGridJobScheduler:
   def __init__(self, annotations_per_config, job_id, job_count):

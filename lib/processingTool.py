@@ -2,7 +2,7 @@ import json
 import os
 import pickle
 from pathlib import Path
-import rectangles
+import lib.rectangles as rectangles
 
 def get_config():
   f = open("./config.json", "r")

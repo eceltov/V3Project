@@ -6,3 +6,5 @@ features*/
 *.pt
 annotation*
 *.txt
+results
+report.html

@@ -2,9 +2,9 @@ from PIL import Image
 import torch
 import torch.nn.functional as F
 import datetime
-import processingTool as pt
-import rankCalculations as rc
-import rectangles
+import lib.processingTool as pt
+import lib.rankCalculations as rc
+import lib.rectangles as rectangles
 
 def get_frame_section(filename, coords):
   x1, y1, x2, y2 = coords

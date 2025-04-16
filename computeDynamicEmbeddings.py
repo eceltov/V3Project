@@ -3,7 +3,7 @@ import datetime
 
 print(f"Job started at: {datetime.datetime.now()}")
 
-import rectangles
+import lib.rectangles as rectangles
 
 # rects = [
 #   [0, 0, 50, 100],

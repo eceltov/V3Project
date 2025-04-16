@@ -1,8 +1,8 @@
 import torch
-import processingTool as pt
-import rankCalculations as rc
-import boundaries
-import rectangles
+import lib.processingTool as pt
+import lib.rankCalculations as rc
+import lib.boundaries as boundaries
+import lib.rectangles as rectangles
 
 # returns a list of tensors, where each tensor represents a section defined by a boundary
 def extract_embeddings(model_year, get_boundaries_callback):

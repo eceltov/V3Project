@@ -1,6 +1,6 @@
 import sys
 import datetime
-import staticAnalysisTool as sat
+import lib.staticAnalysisTool as sat
 
 print(f"Job started at: {datetime.datetime.now()}")
 
