@@ -40,7 +40,7 @@ def save_optimal_grid_results():
     model, _, tokenizer = pt.get_model(embed_config["model_year"])
     for file_id in range(len(filenames[embed_config["skippable"]])):
       file_results = ogat.get_file_results(file_id, model, tokenizer, embed_config)
-      results.append_results(embed_config, file_results)
+      results.append_results(file_results)
       print(".", end="", flush=True)
   results.to_csv(pt.optimal_csv_path)
 
@@ -50,8 +50,8 @@ def save_static_grid_results():
     model, _, tokenizer = pt.get_model(embed_config["model_year"])
     for file_id in range(len(filenames[embed_config["skippable"]])):
       file_results = sat.get_file_results(file_id, model, tokenizer, embed_config)
-      results.append_results(embed_config, file_results)
+      results.append_results(file_results)
       print(".", end="", flush=True)
   results.to_csv(pt.static_csv_path)
 
-save_static_grid_results()
+save_optimal_grid_results()
