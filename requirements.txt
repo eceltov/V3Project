@@ -1,0 +1,11 @@
+huggingface-hub>=0.29.1
+numpy>=1.26.3
+open_clip_torch>=2.31.0
+pandas>=2.2.3
+pillow>=11.0.0
+scikit-learn>=1.6.1
+scipy>=1.13.1
+torch>=2.6.0+cu126
+torchaudio>=2.6.0+cu126
+torchvision>=0.21.0+cu126
+transformers>=4.49.0
