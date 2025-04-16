@@ -1,6 +1,5 @@
 {
   "datasetPath": "../MVK",
-  "datasetPathLinux": "/mnt/c/school/videa/MVK",
   "annotations": {
     "annotationsDir": "../annotations",
     "skippableDir": "skippable",
