@@ -82,8 +82,8 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds, model, tokenizer)
     result_list.append({
       "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"]),
-      "annotation_id": annotation_id,
       "skippable": embed_config["skippable"],
+      "annotation_id": annotation_id,
       "box_enlargements": embed_config["box_enlargements"],
       "model_year": embed_config["model_year"],
       "frame_idx": frame_idx,
