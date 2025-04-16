@@ -1,5 +1,6 @@
 import torch
 import processingTool as pt
+import torch.nn.functional as F
 
 def get_frame_rank(text, frame_idx, embeds, model, tokenizer):
   query = tokenizer(text).to(pt.device)

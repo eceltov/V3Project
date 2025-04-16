@@ -68,37 +68,37 @@
       },
       {
         "skippable": false,
-        "box_enlargements": "centerpiece_overlap",
+        "kind": "centerpiece_overlap",
         "model_year": "2024"
       },
       {
         "skippable": true,
-        "box_enlargements": "centerpiece_overlap",
+        "kind": "centerpiece_overlap",
         "model_year": "2025"
       },
       {
         "skippable": true,
-        "box_enlargements": "centerpiece_overlap",
+        "kind": "centerpiece_overlap",
         "model_year": "2024"
       },
-          {
+      {
         "skippable": false,
         "kind": "whole",
         "model_year": "2025"
       },
       {
         "skippable": false,
-        "box_enlargements": "whole",
+        "kind": "whole",
         "model_year": "2024"
       },
       {
         "skippable": true,
-        "box_enlargements": "whole",
+        "kind": "whole",
         "model_year": "2025"
       },
       {
         "skippable": true,
-        "box_enlargements": "whole",
+        "kind": "whole",
         "model_year": "2024"
       }
     ]

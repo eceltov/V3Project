@@ -32,40 +32,40 @@ def extract_embeddings(model_year, get_boundaries_callback):
 
   return concat_sections
 
-def save_PraK_embeddings(model_year):
-  # boundaries used by PraK
-  get_boundaries_callback = boundaries.get_corner_and_centerpiece_overlap_boundaries
-  embeddings = extract_embeddings(model_year, get_boundaries_callback)
-  pt.write_static_embeddings(model_year, "centerpiece_overlap", embeddings)
+def kind_to_boundaries_callback(kind):
+  if kind == "centerpiece_overlap":
+    return boundaries.get_corner_and_centerpiece_overlap_boundaries
+  if kind == "whole":
+    return boundaries.get_whole_boundaries
+  raise LookupError(f"Did not find boundaries callback for kind: ${kind}")
 
-def save_whole_embeddings(model_year):
-  get_boundaries_callback = boundaries.get_whole_boundaries
+def save_embeddings(model_year, kind):
+  # boundaries used by PraK
+  get_boundaries_callback = kind_to_boundaries_callback(kind)
   embeddings = extract_embeddings(model_year, get_boundaries_callback)
-  pt.write_static_embeddings(model_year, "whole", embeddings)
+  pt.write_static_embeddings(model_year, kind, embeddings)
 
 def get_file_results(file_id, model, tokenizer, embed_config):
   annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
-  embeds = pt.read_static_embeddings(embed_config["model_year"], embed_config["kind"]).to(pt.device)
-  segment_rects = boundaries.get_corner_and_centerpiece_overlap_boundaries(pt.frame_width, pt.frame_height)
+  embeds = pt.read_static_embeddings(embed_config["model_year"], embed_config["kind"])
+  # load segments to gpu
+  embeds = [segment_embeds.to(pt.device) for segment_embeds in embeds]
+  segment_rects = kind_to_boundaries_callback(embed_config["kind"])(pt.frame_width, pt.frame_height)
 
   result_list = []
   for annotation in annotations:
     annotation_id = annotation["id"]
-
-    # skip if the embeddings file does not exist
-    if not pt.does_derived_dataset_embeddings_file_exist(file_id, annotation_id, embed_config):
-      continue
 
     frame_idx = annotation["frameIdx"]
     frame_rect = annotation["rect"]
     desc_short = annotation["desc_short"]
     desc_long = annotation["desc_long"]
     segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
-  
+
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[segment_idx], model, tokenizer)
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[segment_idx], model, tokenizer)
     result_list.append({
-      "file_id": file_id,
+      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"]),
       "annotation_id": annotation_id,
       "skippable": embed_config["skippable"],
       "kind": embed_config["kind"],
