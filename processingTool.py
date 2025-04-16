@@ -23,6 +23,7 @@ frame_height = config["frameHeight"]
 box_enlargement_step = config["boxEnlargementStep"]
 optimal_csv_path = derived_dataset_embeddings_config["csvPath"]
 static_csv_path = static_embeddings_config["csvPath"]
+annotation_csv_path = annotations_config["csvPath"]
 
 def get_annotation_filenames_and_dir_path(skippable):
   if skippable:

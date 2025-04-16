@@ -4,7 +4,8 @@
   "annotations": {
     "annotationsDir": "../annotations",
     "skippableDir": "skippable",
-    "notSkippableDir": "notSkippable"
+    "notSkippableDir": "notSkippable",
+    "csvPath": "./results/annotations.csv"
   },
   "device": "cuda",
   "derivedDatasetEmbeddings": {
