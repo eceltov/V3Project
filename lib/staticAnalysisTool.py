@@ -65,7 +65,7 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[segment_idx], model, tokenizer)
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[segment_idx], model, tokenizer)
     result_list.append({
-      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"]),
+      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
       "skippable": embed_config["skippable"],
       "annotation_id": annotation_id,
       "kind": embed_config["kind"],
