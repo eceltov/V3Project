@@ -103,6 +103,9 @@
       }
     ]
   },
+  "dynamicEmbeddings": {
+    "mainDir": "./dynamicEmbeddings"
+  },
   "frameWidth": 682,
   "frameHeight": 384,
   "boxEnlargementStep": 30
