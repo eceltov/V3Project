@@ -104,7 +104,8 @@
     ]
   },
   "dynamicEmbeddings": {
-    "mainDir": "./dynamicEmbeddings"
+    "mainDir": "./dynamicEmbeddings",
+    "csvPath": "./results/dynamicResults.csv"
   },
   "frameWidth": 682,
   "frameHeight": 384,

@@ -100,3 +100,21 @@ def search_detection_boxes(annotation_rect: list, text: str, detection_rects: li
     sorted_indices = torch.argsort(distances)[0]
 
   return sorted_indices
+
+def get_file_results(file_id, embed_config):
+  annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
+
+  result_list = []
+  for annotation in annotations:
+    annotation_id = annotation["id"]
+
+    frame_idx = annotation["frameIdx"]
+    result_list.append({
+      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
+      "skippable": embed_config["skippable"],
+      "annotation_id": annotation_id,
+      "model_year": embed_config["model_year"],
+      "frame_idx": frame_idx,
+    })
+
+  return result_list
