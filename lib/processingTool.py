@@ -63,7 +63,10 @@ def get_first_n_annotations(file_id, n, skippable):
   return get_file_annotations(file_id, skippable)[:n]
 
 def get_annotation(file_id, annotation_id, skippable):
-  return get_file_annotations(file_id, skippable)[annotation_id]
+  file_annotations = get_file_annotations(file_id, skippable)
+  if annotation_id < len(file_annotations):
+    return file_annotations[annotation_id]
+  return None
 
 def get_filename_from_file_id(file_id, skippable):
   annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)

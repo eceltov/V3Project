@@ -31,6 +31,9 @@ def get_derived_dataset_embeddings(bounding_box, embed_config):
 
 def process_annotation(file_id, annotation_id, embed_config):
   annotation = pt.get_annotation(file_id, annotation_id, embed_config["skippable"])
+  # skip nonexistent annotations
+  if annotation == None:
+    return
   # apply enlargement to the rect if any
   rect = pt.get_annotation_rect(annotation, embed_config)
   embeddings = get_derived_dataset_embeddings(rect, embed_config)
