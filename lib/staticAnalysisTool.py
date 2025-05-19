@@ -33,8 +33,16 @@ def extract_embeddings(model_year, get_boundaries_callback):
   return concat_sections
 
 def kind_to_boundaries_callback(kind):
-  if kind == "centerpiece_overlap":
-    return boundaries.get_corner_and_centerpiece_overlap_boundaries
+  if kind == "centerpiece_0":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0)
+  if kind == "centerpiece_10":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.1)
+  if kind == "centerpiece_20":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.2)
+  if kind == "centerpiece_30":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.3)
+  if kind == "centerpiece_40":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.4)
   if kind == "whole":
     return boundaries.get_whole_boundaries
   raise LookupError(f"Did not find boundaries callback for kind: ${kind}")
@@ -60,15 +68,75 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     frame_rect = annotation["rect"]
     desc_short = annotation["desc_short"]
     desc_long = annotation["desc_long"]
+
+    # pertube the annotation rectangle randomly (simulation imperfect user input rect)
+    if embed_config["pertubation_factor"] > 0:
+      frame_rect = rectangles.pertube_rect(frame_rect, embed_config["pertubation_factor"], pt.frame_width, pt.frame_height)
+
     segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
 
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[segment_idx], model, tokenizer)
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[segment_idx], model, tokenizer)
     result_list.append({
-      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"]),
+      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
       "skippable": embed_config["skippable"],
       "annotation_id": annotation_id,
       "kind": embed_config["kind"],
+      "model_year": embed_config["model_year"],
+      "frame_idx": frame_idx,
+      "rank_short": rank_short,
+      "rank_long": rank_long,
+      "IoU": IoU,
+    })
+    print("#", end="", flush=True)
+
+  return result_list
+
+suffixes = {
+  "short": [
+    " in the upper left",
+    " in the lower left",
+    " in the upper right",
+    " in the lower right",
+    " in the center",
+  ],
+  "long": [
+    " in the upper left part of the image",
+    " in the lower left part of the image",
+    " in the upper right part of the image",
+    " in the lower right part of the image",
+    " in the center part of the image",
+  ],
+}
+
+def get_centerpiece_overlap_textual_suffix(segment_idx, suffix_kind):
+  return suffixes[suffix_kind][segment_idx]
+
+def get_file_results_textual(file_id, model, tokenizer, embed_config, suffix_kind):
+  annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
+  embeds = pt.read_static_embeddings(embed_config["model_year"], "whole")
+  # load segments to gpu
+  embeds = [segment_embeds.to(pt.device) for segment_embeds in embeds]
+  segment_rects = kind_to_boundaries_callback("centerpiece_overlap")(pt.frame_width, pt.frame_height)
+
+  result_list = []
+  for annotation in annotations:
+    annotation_id = annotation["id"]
+
+    frame_idx = annotation["frameIdx"]
+    frame_rect = annotation["rect"]
+    segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
+    suffix = get_centerpiece_overlap_textual_suffix(segment_idx, suffix_kind)
+    desc_short = annotation["desc_short"] + suffix
+    desc_long = annotation["desc_long"] + suffix
+
+    rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[0], model, tokenizer)
+    rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[0], model, tokenizer)
+    result_list.append({
+      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
+      "skippable": embed_config["skippable"],
+      "annotation_id": annotation_id,
+      "kind": f"textual_{suffix_kind}",
       "model_year": embed_config["model_year"],
       "frame_idx": frame_idx,
       "rank_short": rank_short,

@@ -3,6 +3,12 @@ import pandas as pd
 from lib.resultAggregator import ResultAggregator
 import lib.optimalGridAnalysisTool as ogat
 import lib.staticAnalysisTool as sat
+import lib.dynamicAnalysisTool as dat
+import numpy as np
+import random
+
+# seed the RNG for consistent pertubations
+random.seed(0)
 
 skippable_filenames, _ = pt.get_annotation_filenames_and_dir_path(True)
 not_skippable_filenames, _ = pt.get_annotation_filenames_and_dir_path(False)
@@ -51,7 +57,32 @@ def save_static_grid_results():
     for file_id in range(len(filenames[embed_config["skippable"]])):
       file_results = sat.get_file_results(file_id, model, tokenizer, embed_config)
       results.append_results(file_results)
+      # trick to ignore kind of the defined embeds
+      if embed_config["kind"] == "whole":
+        textual_results_long = sat.get_file_results_textual(file_id, model, tokenizer, embed_config, "long")
+        textual_results_short = sat.get_file_results_textual(file_id, model, tokenizer, embed_config, "short")
+        results.append_results(textual_results_long)
+        results.append_results(textual_results_short)
       print(".", end="", flush=True)
   results.to_csv(pt.static_csv_path)
 
-save_annotations()
+def save_dynamic_grid_results():
+  results = ResultAggregator()
+  embed_config = {
+    "model_year": "2025",
+    "skippable": False,
+  }
+
+  ranks = np.load("./rank_index.npy")
+
+  for file_id in range(len(filenames[embed_config["skippable"]])):
+    file_results = dat.get_file_results(file_id, embed_config)
+    results.append_results(file_results)
+
+  for annotation_idx in range(len(results.results)):
+    results.results[annotation_idx]["rank"] = ranks[annotation_idx]
+    results.results[annotation_idx]["description_kind"] = "long"
+
+  results.to_csv(pt.dynamic_csv_path)
+
+save_static_grid_results()

@@ -1,5 +1,6 @@
 from sklearn.cluster import KMeans
 import math
+import random
 
 # swaps rect coords so that the first point has all dimensions lower than the second
 def normalize(rect):
@@ -71,7 +72,7 @@ def get_centroids_and_sorted_rects(rects, k):
 
   return centroids, sorted_rects
 
-# returns a rect centered on a centroid with a shame derived from the input rects
+# returns a rect centered on a centroid with a shape derived from the input rects
 def get_representing_rect(centroid, rects, representing_rect_area):
   width_sum = 0
   height_sum = 0
@@ -117,3 +118,39 @@ def confine_to_area(width, height, rect):
     y2 -= delta
 
   return [x1, y1, x2, y2]
+
+# shifts a rectangle randomly by applying a gaussian noise with standard deviation == magnitude
+def random_perturbation(rect, magnitude = 10):
+   x1, y1, x2, y2 = rect
+   dx = random.gauss(0, magnitude)
+   dy = random.gauss(0, magnitude)
+   return [x1 + dx, y1 + dy, x2 + dx, y2 + dy]
+
+# increases the size of a rectangle randomly by a gaussian noise with standard deviation == magnitude
+def random_perturbation_size(rect, magnitude = 10):
+   x1, y1, x2, y2 = rect
+   dx = random.gauss(1, magnitude)
+   dy = random.gauss(1, magnitude)
+
+   center_x = (x1 + x2) / 2
+   center_y = (y1 + y2) / 2
+   width = x2 - x1
+   height = y2 - y1
+   new_width = width * dx
+   new_height = height * dy
+
+   return [center_x - (new_width/2), center_y - (new_height/2), center_x + (new_width/2), center_y + (new_height/2)]
+
+# shift the rectangle and change its size based on a factor relative to the frame size
+# rect dimensions are shifted by a random scalar taken from a gaussian with
+#   the pertubation factor multiplied with the average frame side as the standard deviation
+# rect width and height is multiplied by a random factor taken
+#   from a gaussian with the pertubation factor as the standard deviation
+def pertube_rect(rect, pertubation_factor, frame_width, frame_height):
+  avg_side = (frame_width + frame_height) / 2
+
+  pertubed_rect = random_perturbation(rect, avg_side * pertubation_factor)
+  pertubed_rect = random_perturbation_size(pertubed_rect, pertubation_factor)
+  pertubed_rect = normalize(pertubed_rect)
+  pertubed_rect = confine_to_area(frame_width, frame_height, pertubed_rect)
+  return pertubed_rect

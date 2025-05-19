@@ -63,45 +63,171 @@
     "embedConfigs": [
       {
         "skippable": false,
-        "kind": "centerpiece_overlap",
-        "model_year": "2025"
+        "kind": "centerpiece_0",
+        "model_year": "2025",
+        "pertubation_factor": 0
       },
       {
         "skippable": false,
-        "kind": "centerpiece_overlap",
-        "model_year": "2024"
+        "kind": "centerpiece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_30",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_40",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+            {
+        "skippable": false,
+        "kind": "centerpiece_0",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_30",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_40",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+            {
+        "skippable": false,
+        "kind": "centerpiece_0",
+        "model_year": "2025",
+        "pertubation_factor": 0.2
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.2
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.2
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_30",
+        "model_year": "2025",
+        "pertubation_factor": 0.2
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_40",
+        "model_year": "2025",
+        "pertubation_factor": 0.2
+      },
+            {
+        "skippable": false,
+        "kind": "centerpiece_0",
+        "model_year": "2025",
+        "pertubation_factor": 0.3
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.3
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.3
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_30",
+        "model_year": "2025",
+        "pertubation_factor": 0.3
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_40",
+        "model_year": "2025",
+        "pertubation_factor": 0.3
+      },
+      {
+        "skippable": false,
+        "kind": "centerpiece_10",
+        "model_year": "2024",
+        "pertubation_factor": 0
       },
       {
         "skippable": true,
-        "kind": "centerpiece_overlap",
-        "model_year": "2025"
+        "kind": "centerpiece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0
       },
       {
         "skippable": true,
-        "kind": "centerpiece_overlap",
-        "model_year": "2024"
+        "kind": "centerpiece_10",
+        "model_year": "2024",
+        "pertubation_factor": 0
       },
       {
         "skippable": false,
         "kind": "whole",
-        "model_year": "2025"
+        "model_year": "2025",
+        "pertubation_factor": 0
       },
       {
         "skippable": false,
         "kind": "whole",
-        "model_year": "2024"
+        "model_year": "2024",
+        "pertubation_factor": 0
       },
       {
         "skippable": true,
         "kind": "whole",
-        "model_year": "2025"
+        "model_year": "2025",
+        "pertubation_factor": 0
       },
       {
         "skippable": true,
         "kind": "whole",
-        "model_year": "2024"
+        "model_year": "2024",
+        "pertubation_factor": 0
       }
     ]
+  },
+  "dynamicEmbeddings": {
+    "mainDir": "./dynamicEmbeddings",
+    "csvPath": "./results/dynamicResults.csv"
   },
   "frameWidth": 682,
   "frameHeight": 384,

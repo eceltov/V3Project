@@ -18,11 +18,13 @@ annotation_filenames_skippable = sorted(os.listdir(annotations_dir_skippable))
 annotation_filenames_not_skippable = sorted(os.listdir(annotations_dir_not_skippable))
 derived_dataset_embeddings_config = config["derivedDatasetEmbeddings"]
 static_embeddings_config = config["staticEmbeddings"]
+dynamic_embeddings_config = config["dynamicEmbeddings"]
 frame_width = config["frameWidth"]
 frame_height = config["frameHeight"]
 box_enlargement_step = config["boxEnlargementStep"]
 optimal_csv_path = derived_dataset_embeddings_config["csvPath"]
 static_csv_path = static_embeddings_config["csvPath"]
+dynamic_csv_path = dynamic_embeddings_config["csvPath"]
 annotation_csv_path = annotations_config["csvPath"]
 
 def get_annotation_filenames_and_dir_path(skippable):
@@ -139,6 +141,10 @@ def get_MVK_metadata():
   metadata_cache = filepaths, video_to_frame_indices_map, frame_idx_to_frame_path_map, frame_path_to_frame_idx_map
   return metadata_cache
 
+def get_frame_count():
+  filepaths, _, _, _ = get_MVK_metadata()
+  return len(filepaths)
+
 def get_annotation_rect(annotation, embed_config):
   # swap coords so that the first point has lower coords than the second
   x1, y1, x2, y2 = rectangles.normalize(annotation["rect"])
@@ -181,6 +187,9 @@ def get_derived_dataset_embeddings_dir(embed_config):
 def get_static_embeddings_filename(model_year, kind):
   return f"{kind}_{model_year}_embeddings"
 
+def get_dynamic_embeddings_filename(model_year):
+  return f"{model_year}_embeddings"
+
 def get_derived_dataset_embeddings_filename(file_id, annotation_id, skippable):
   annotations_filename = get_filename_from_file_id(file_id, skippable)
   data_filename = f"{annotations_filename}_{annotation_id}"
@@ -209,6 +218,18 @@ def read_static_embeddings(model_year, kind):
   data_filename = get_static_embeddings_filename(model_year, kind)
   static_embeddings_dir = static_embeddings_config["mainDir"]
   return read_pickle_file(os.path.join(static_embeddings_dir, data_filename))
+
+def write_dynamic_embeddings(model_year, data):
+  data_filename = get_dynamic_embeddings_filename(model_year)
+  # create folder if it does not exist
+  dynamic_embeddings_dir = dynamic_embeddings_config["mainDir"]
+  Path(dynamic_embeddings_dir).mkdir(parents=True, exist_ok=True)
+  write_pickle_file(os.path.join(dynamic_embeddings_dir, data_filename), data)
+
+def read_dynamic_embeddings(model_year):
+  data_filename = get_dynamic_embeddings_filename(model_year)
+  dynamic_embeddings_dir = dynamic_embeddings_config["mainDir"]
+  return read_pickle_file(os.path.join(dynamic_embeddings_dir, data_filename))
 
 # returns the id of the last annotation for the given annotations file
 # used to create a derived embeddings file
