@@ -33,8 +33,16 @@ def extract_embeddings(model_year, get_boundaries_callback):
   return concat_sections
 
 def kind_to_boundaries_callback(kind):
-  if kind == "centerpiece_overlap":
-    return boundaries.get_corner_and_centerpiece_overlap_boundaries
+  if kind == "centerpiece_0":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0)
+  if kind == "centerpiece_10":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.1)
+  if kind == "centerpiece_20":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.2)
+  if kind == "centerpiece_30":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.3)
+  if kind == "centerpiece_40":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.4)
   if kind == "whole":
     return boundaries.get_whole_boundaries
   raise LookupError(f"Did not find boundaries callback for kind: ${kind}")
@@ -60,6 +68,11 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     frame_rect = annotation["rect"]
     desc_short = annotation["desc_short"]
     desc_long = annotation["desc_long"]
+
+    # pertube the annotation rectangle randomly (simulation imperfect user input rect)
+    if embed_config["pertubation_factor"] > 0:
+      frame_rect = rectangles.pertube_rect(frame_rect, embed_config["pertubation_factor"], pt.frame_width, pt.frame_height)
+
     segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
 
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[segment_idx], model, tokenizer)

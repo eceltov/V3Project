@@ -5,6 +5,10 @@ import lib.optimalGridAnalysisTool as ogat
 import lib.staticAnalysisTool as sat
 import lib.dynamicAnalysisTool as dat
 import numpy as np
+import random
+
+# seed the RNG for consistent pertubations
+random.seed(0)
 
 skippable_filenames, _ = pt.get_annotation_filenames_and_dir_path(True)
 not_skippable_filenames, _ = pt.get_annotation_filenames_and_dir_path(False)
