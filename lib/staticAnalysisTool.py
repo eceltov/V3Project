@@ -68,10 +68,11 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     frame_rect = annotation["rect"]
     desc_short = annotation["desc_short"]
     desc_long = annotation["desc_long"]
+    pertubation = embed_config["pertubation_factor"]
 
     # pertube the annotation rectangle randomly (simulation imperfect user input rect)
-    if embed_config["pertubation_factor"] > 0:
-      frame_rect = rectangles.pertube_rect(frame_rect, embed_config["pertubation_factor"], pt.frame_width, pt.frame_height)
+    if pertubation > 0:
+      frame_rect = rectangles.pertube_rect(frame_rect, pertubation, pt.frame_width, pt.frame_height)
 
     segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
 
@@ -87,6 +88,7 @@ def get_file_results(file_id, model, tokenizer, embed_config):
       "rank_short": rank_short,
       "rank_long": rank_long,
       "IoU": IoU,
+      "pertubation_factor": pertubation,
     })
     print("#", end="", flush=True)
 
@@ -117,7 +119,7 @@ def get_file_results_textual(file_id, model, tokenizer, embed_config, suffix_kin
   embeds = pt.read_static_embeddings(embed_config["model_year"], "whole")
   # load segments to gpu
   embeds = [segment_embeds.to(pt.device) for segment_embeds in embeds]
-  segment_rects = kind_to_boundaries_callback("centerpiece_overlap")(pt.frame_width, pt.frame_height)
+  segment_rects = kind_to_boundaries_callback("centerpiece_10")(pt.frame_width, pt.frame_height)
 
   result_list = []
   for annotation in annotations:
@@ -142,6 +144,7 @@ def get_file_results_textual(file_id, model, tokenizer, embed_config, suffix_kin
       "rank_short": rank_short,
       "rank_long": rank_long,
       "IoU": IoU,
+      "pertubation_factor": 0,
     })
     print("#", end="", flush=True)
 
