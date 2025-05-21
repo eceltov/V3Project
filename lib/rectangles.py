@@ -146,10 +146,19 @@ def random_perturbation_size(rect, magnitude = 10):
 #   the pertubation factor multiplied with the average frame side as the standard deviation
 # rect width and height is multiplied by a random factor taken
 #   from a gaussian with the pertubation factor as the standard deviation
-def pertube_rect(rect, pertubation_factor, frame_width, frame_height):
+def pertube_rect2(rect, pertubation_factor, frame_width, frame_height):
   avg_side = (frame_width + frame_height) / 2
 
   pertubed_rect = random_perturbation(rect, avg_side * pertubation_factor)
+  pertubed_rect = random_perturbation_size(pertubed_rect, pertubation_factor)
+  pertubed_rect = normalize(pertubed_rect)
+  pertubed_rect = confine_to_area(frame_width, frame_height, pertubed_rect)
+  return pertubed_rect
+
+def pertube_rect(rect, pertubation_factor, frame_width, frame_height):
+  shift_factor = pertubation_factor * 100
+
+  pertubed_rect = random_perturbation(rect, shift_factor)
   pertubed_rect = random_perturbation_size(pertubed_rect, pertubation_factor)
   pertubed_rect = normalize(pertubed_rect)
   pertubed_rect = confine_to_area(frame_width, frame_height, pertubed_rect)

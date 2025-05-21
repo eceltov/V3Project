@@ -64,6 +64,7 @@ def save_static_grid_results():
         results.append_results(textual_results_long)
         results.append_results(textual_results_short)
       print(".", end="", flush=True)
+    print("<c>", end="", flush=True)
   results.to_csv(pt.static_csv_path)
 
 def save_dynamic_grid_results():

@@ -125,61 +125,61 @@
         "skippable": true,
         "kind": "centerpiece_0",
         "model_year": "2025",
-        "pertubation_factor": 0.2
+        "pertubation_factor": 0.25
       },
       {
         "skippable": true,
         "kind": "centerpiece_10",
         "model_year": "2025",
-        "pertubation_factor": 0.2
+        "pertubation_factor": 0.25
       },
       {
         "skippable": true,
         "kind": "centerpiece_20",
         "model_year": "2025",
-        "pertubation_factor": 0.2
+        "pertubation_factor": 0.25
       },
       {
         "skippable": true,
         "kind": "centerpiece_30",
         "model_year": "2025",
-        "pertubation_factor": 0.2
+        "pertubation_factor": 0.25
       },
       {
         "skippable": true,
         "kind": "centerpiece_40",
         "model_year": "2025",
-        "pertubation_factor": 0.2
+        "pertubation_factor": 0.25
       },
             {
         "skippable": true,
         "kind": "centerpiece_0",
         "model_year": "2025",
-        "pertubation_factor": 0.3
+        "pertubation_factor": 0.5
       },
       {
         "skippable": true,
         "kind": "centerpiece_10",
         "model_year": "2025",
-        "pertubation_factor": 0.3
+        "pertubation_factor": 0.5
       },
       {
         "skippable": true,
         "kind": "centerpiece_20",
         "model_year": "2025",
-        "pertubation_factor": 0.3
+        "pertubation_factor": 0.5
       },
       {
         "skippable": true,
         "kind": "centerpiece_30",
         "model_year": "2025",
-        "pertubation_factor": 0.3
+        "pertubation_factor": 0.5
       },
       {
         "skippable": true,
         "kind": "centerpiece_40",
         "model_year": "2025",
-        "pertubation_factor": 0.3
+        "pertubation_factor": 0.5
       },
       {
         "skippable": false,
