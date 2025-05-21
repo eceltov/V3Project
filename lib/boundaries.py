@@ -55,6 +55,27 @@ def get_corner_and_centerpiece_overlap_boundaries(width, height, overlap=0.1):
     (centerpiece_x, centerpiece_y, centerpiece_x + seg_width, centerpiece_y + seg_height)
   ]
 
+def get_9_piece_overlap_boundaries(width, height, overlap):
+  rel_side = 0.333333 + overlap
+  seg_width = math.floor(width * rel_side)
+  seg_height = math.floor(height * rel_side)
+  centerpiece_x = math.floor(width * (0.5 - rel_side / 2))
+  centerpiece_y = math.floor(height * (0.5 - rel_side / 2))
+
+  return [
+    (0, 0, seg_width, seg_height), # left upper
+    (0, centerpiece_y, seg_width, centerpiece_y + seg_height), # left middle
+    (0, height - seg_height, seg_width, height), # left lower
+
+    (centerpiece_x, 0, centerpiece_x + seg_width, seg_height), # middle upper
+    (centerpiece_x, centerpiece_y, centerpiece_x + seg_width, centerpiece_y + seg_height), # centerpiece
+    (centerpiece_x, height - seg_height, centerpiece_x + seg_width, height), # middle lower
+
+    (width - seg_width, 0, width, seg_height), # right upper
+    (width - seg_width, centerpiece_y, width, centerpiece_y + seg_height), # right middle
+    (width - seg_width, height - seg_height, width, height), # right lower
+  ]
+
 def get_8_piece_center_overlap_boundaries(width, height):
   seg_width = math.floor(width * 0.5)
   seg_height = math.floor(height * 0.5)
