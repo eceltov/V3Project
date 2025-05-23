@@ -63,6 +63,198 @@
     "embedConfigs": [
       {
         "skippable": true,
+        "kind": "9_piece_5",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_25",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_5",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_25",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_5",
+        "model_year": "2025",
+        "pertubation_factor": 0.25
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.25
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.25
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_25",
+        "model_year": "2025",
+        "pertubation_factor": 0.25
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_5",
+        "model_year": "2025",
+        "pertubation_factor": 0.5
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.5
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.5
+      },
+      {
+        "skippable": true,
+        "kind": "9_piece_25",
+        "model_year": "2025",
+        "pertubation_factor": 0.5
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_5",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_25",
+        "model_year": "2025",
+        "pertubation_factor": 0
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_5",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_25",
+        "model_year": "2025",
+        "pertubation_factor": 0.1
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_5",
+        "model_year": "2025",
+        "pertubation_factor": 0.25
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.25
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.25
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_25",
+        "model_year": "2025",
+        "pertubation_factor": 0.25
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_5",
+        "model_year": "2025",
+        "pertubation_factor": 0.5
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_10",
+        "model_year": "2025",
+        "pertubation_factor": 0.5
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_20",
+        "model_year": "2025",
+        "pertubation_factor": 0.5
+      },
+      {
+        "skippable": false,
+        "kind": "9_piece_25",
+        "model_year": "2025",
+        "pertubation_factor": 0.5
+      },
+      {
+        "skippable": true,
         "kind": "centerpiece_0",
         "model_year": "2025",
         "pertubation_factor": 0
@@ -91,7 +283,7 @@
         "model_year": "2025",
         "pertubation_factor": 0
       },
-            {
+      {
         "skippable": true,
         "kind": "centerpiece_0",
         "model_year": "2025",
@@ -121,7 +313,7 @@
         "model_year": "2025",
         "pertubation_factor": 0.1
       },
-            {
+      {
         "skippable": true,
         "kind": "centerpiece_0",
         "model_year": "2025",
@@ -151,7 +343,7 @@
         "model_year": "2025",
         "pertubation_factor": 0.25
       },
-            {
+      {
         "skippable": true,
         "kind": "centerpiece_0",
         "model_year": "2025",
@@ -211,7 +403,7 @@
         "model_year": "2025",
         "pertubation_factor": 0
       },
-            {
+      {
         "skippable": false,
         "kind": "centerpiece_0",
         "model_year": "2025",
@@ -271,7 +463,7 @@
         "model_year": "2025",
         "pertubation_factor": 0.25
       },
-            {
+      {
         "skippable": false,
         "kind": "centerpiece_0",
         "model_year": "2025",

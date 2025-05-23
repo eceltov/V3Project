@@ -33,28 +33,11 @@ def extract_embeddings(model_year, get_boundaries_callback):
   return concat_sections
 
 def kind_to_boundaries_callback(kind):
-  if kind == "centerpiece_0":
-    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0)
-  if kind == "centerpiece_10":
-    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.1)
-  if kind == "centerpiece_20":
-    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.2)
-  if kind == "centerpiece_30":
-    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.3)
-  if kind == "centerpiece_40":
-    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, 0.4)
-  if kind == "9_piece_0":
-    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, 0)
-  if kind == "9_piece_5":
-    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, 0.05)
-  if kind == "9_piece_10":
-    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, 0.1)
-  if kind == "9_piece_15":
-    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, 0.15)
-  if kind == "9_piece_20":
-    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, 0.2)
-  if kind == "9_piece_25":
-    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, 0.25)
+  tokens = kind.split("_")
+  if tokens[0] == "centerpiece":
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, int(tokens[1]))
+  if tokens[0] == "9" and tokens[1] == "piece":
+    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, int(tokens[2]))
   if kind == "whole":
     return boundaries.get_whole_boundaries
   raise LookupError(f"Did not find boundaries callback for kind: ${kind}")
