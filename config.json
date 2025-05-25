@@ -60,6 +60,7 @@
   "staticEmbeddings": {
     "mainDir": "./staticEmbeddings",
     "csvPath": "./results/staticResults.csv",
+    "pertubationsPerAnnotation": 5,
     "embedConfigs": [
       {
         "skippable": true,

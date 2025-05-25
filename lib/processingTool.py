@@ -26,6 +26,7 @@ optimal_csv_path = derived_dataset_embeddings_config["csvPath"]
 static_csv_path = static_embeddings_config["csvPath"]
 dynamic_csv_path = dynamic_embeddings_config["csvPath"]
 annotation_csv_path = annotations_config["csvPath"]
+pertubations_per_annotation = static_embeddings_config["pertubationsPerAnnotation"]
 
 def get_annotation_filenames_and_dir_path(skippable):
   if skippable:

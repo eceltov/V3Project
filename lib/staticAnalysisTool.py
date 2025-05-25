@@ -65,26 +65,33 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     desc_long = annotation["desc_long"]
     pertubation = embed_config["pertubation_factor"]
 
-    # pertube the annotation rectangle randomly (simulation imperfect user input rect)
-    if pertubation > 0:
-      frame_rect = rectangles.pertube_rect(frame_rect, pertubation, pt.frame_width, pt.frame_height)
+    for perturbation_id in range(pt.pertubations_per_annotation):
+      # pertube the annotation rectangle randomly (simulation imperfect user input rect)
+      if pertubation > 0:
+        frame_rect = rectangles.pertube_rect(frame_rect, pertubation, pt.frame_width, pt.frame_height)
 
-    segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
+      segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
 
-    rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[segment_idx], model, tokenizer)
-    rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[segment_idx], model, tokenizer)
-    result_list.append({
-      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
-      "skippable": embed_config["skippable"],
-      "annotation_id": annotation_id,
-      "kind": embed_config["kind"],
-      "model_year": embed_config["model_year"],
-      "frame_idx": frame_idx,
-      "rank_short": rank_short,
-      "rank_long": rank_long,
-      "IoU": IoU,
-      "pertubation_factor": pertubation,
-    })
+      rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[segment_idx], model, tokenizer)
+      rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[segment_idx], model, tokenizer)
+      result_list.append({
+        "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
+        "skippable": embed_config["skippable"],
+        "annotation_id": annotation_id,
+        "perturbation_id": perturbation_id,
+        "kind": embed_config["kind"],
+        "model_year": embed_config["model_year"],
+        "frame_idx": frame_idx,
+        "rank_short": rank_short,
+        "rank_long": rank_long,
+        "IoU": IoU,
+        "pertubation_factor": pertubation,
+      })
+
+      # do not create duplicate rows for unpertubed results
+      if pertubation <= 0:
+        break
+
     print("#", end="", flush=True)
 
   return result_list
@@ -133,6 +140,7 @@ def get_file_results_textual(file_id, model, tokenizer, embed_config, suffix_kin
       "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
       "skippable": embed_config["skippable"],
       "annotation_id": annotation_id,
+      "perturbation_id": 0,
       "kind": f"textual_{suffix_kind}",
       "model_year": embed_config["model_year"],
       "frame_idx": frame_idx,
