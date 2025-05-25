@@ -20,7 +20,7 @@ def extract_embeddings(model_year, get_boundaries_callback):
       sections = boundaries.get_image_sections(filenames[i], get_boundaries_callback)
 
       if i % 100 == 0:
-        print("processed images:", i)
+        print("processed images:", i, flush=True)
 
       for section_idx in range(section_count):
         preprocessed = preprocess(sections[section_idx]).unsqueeze(0).to(pt.device)
@@ -37,7 +37,7 @@ def kind_to_boundaries_callback(kind):
   if tokens[0] == "centerpiece":
     return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, int(tokens[1]))
   if tokens[0] == "9" and tokens[1] == "piece":
-    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, int(tokens[2]))
+    return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, int(tokens[2]) / 100)
   if kind == "whole":
     return boundaries.get_whole_boundaries
   raise LookupError(f"Did not find boundaries callback for kind: ${kind}")
