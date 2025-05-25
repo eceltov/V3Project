@@ -35,7 +35,7 @@ def extract_embeddings(model_year, get_boundaries_callback):
 def kind_to_boundaries_callback(kind):
   tokens = kind.split("_")
   if tokens[0] == "centerpiece":
-    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, int(tokens[1]))
+    return lambda width, height: boundaries.get_corner_and_centerpiece_overlap_boundaries(width, height, int(tokens[1]) / 100)
   if tokens[0] == "9" and tokens[1] == "piece":
     return lambda width, height: boundaries.get_9_piece_overlap_boundaries(width, height, int(tokens[2]) / 100)
   if kind == "whole":
