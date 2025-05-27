@@ -2,6 +2,7 @@ import torch
 import lib.processingTool as pt
 import torch.nn.functional as F
 
+# given a query and dataset embeddings, find the rank of a specific frame
 def get_frame_rank(text, frame_idx, embeds, model, tokenizer):
   query = tokenizer(text).to(pt.device)
 

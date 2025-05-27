@@ -1,6 +1,10 @@
 from PIL import Image
 import math
 
+# This file contains functions that return an array of boundary rectangles.
+# Given a width, height, and possibly an overlap parameter, each array element is a (x1,y1,x2,y2) tuple representing
+# the segmentation kind.
+
 def get_whole_boundaries(width, height):
   return [
     (0, 0, width, height), # one large segment
