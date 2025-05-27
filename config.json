@@ -67,7 +67,10 @@
   },
   "dynamicEmbeddings": {
     "mainDir": "./dynamicEmbeddings",
-    "csvPath": "./results/dynamicResults.csv"
+    "csvPath": "./results/dynamicResults.csv",
+    "detectionBoxesPath": "./detectionBoxes",
+    "dinoCheckpointPath": "/mnt/c/school/videa/dynamicAnnotation/GroundingDINO/weights/groundingdino_swint_ogc.pth",
+    "dinoConfigPath": "/mnt/c/school/videa/dynamicAnnotation/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
   },
   "frameWidth": 682,
   "frameHeight": 384,

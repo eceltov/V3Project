@@ -25,6 +25,9 @@ box_enlargement_step = config["boxEnlargementStep"]
 optimal_csv_path = derived_dataset_embeddings_config["csvPath"]
 static_csv_path = static_embeddings_config["csvPath"]
 dynamic_csv_path = dynamic_embeddings_config["csvPath"]
+detection_boxes_path = dynamic_embeddings_config["detectionBoxesPath"]
+dino_checkpoint_path = dynamic_embeddings_config["dinoCheckpointPath"]
+dino_config_path = dynamic_embeddings_config["dinoConfigPath"]
 annotation_csv_path = annotations_config["csvPath"]
 pertubations_per_annotation = static_embeddings_config["pertubationsPerAnnotation"]
 
@@ -219,6 +222,14 @@ def read_static_embeddings(model_year, kind):
   data_filename = get_static_embeddings_filename(model_year, kind)
   static_embeddings_dir = static_embeddings_config["mainDir"]
   return read_pickle_file(os.path.join(static_embeddings_dir, data_filename))
+
+def write_detection_boxes(data):
+  data_filename = detection_boxes_path
+  write_pickle_file(data_filename, data)
+
+def read_detection_boxes():
+  data_filename = detection_boxes_path
+  return read_pickle_file(data_filename)
 
 def write_dynamic_embeddings(model_year, data):
   data_filename = get_dynamic_embeddings_filename(model_year)

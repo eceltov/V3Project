@@ -31,48 +31,6 @@ def get_boxes(tgt):
 
     return boxes
 
-def plot_boxes_to_image(image_pil, tgt):
-    H, W = tgt["size"]
-    boxes = tgt["boxes"]
-    labels = tgt["labels"]
-    assert len(boxes) == len(labels), "boxes and labels must have same length"
-
-    draw = ImageDraw.Draw(image_pil)
-    mask = Image.new("L", image_pil.size, 0)
-    mask_draw = ImageDraw.Draw(mask)
-
-    # draw boxes and masks
-    for box, label in zip(boxes, labels):
-        # from 0..1 to 0..W, 0..H
-        box = box * torch.Tensor([W, H, W, H])
-        # from xywh to xyxy
-        box[:2] -= box[2:] / 2
-        box[2:] += box[:2]
-        print(box)
-        # random color
-        color = tuple(np.random.randint(0, 255, size=3).tolist())
-        # draw
-        x0, y0, x1, y1 = box
-        x0, y0, x1, y1 = int(x0), int(y0), int(x1), int(y1)
-
-        draw.rectangle([x0, y0, x1, y1], outline=color, width=6)
-        # draw.text((x0, y0), str(label), fill=color)
-
-        font = ImageFont.load_default()
-        if hasattr(font, "getbbox"):
-            bbox = draw.textbbox((x0, y0), str(label), font)
-        else:
-            w, h = draw.textsize(str(label), font)
-            bbox = (x0, y0, w + x0, y0 + h)
-        # bbox = draw.textbbox((x0, y0), str(label))
-        draw.rectangle(bbox, fill=color)
-        draw.text((x0, y0), str(label), fill="white")
-
-        mask_draw.rectangle([x0, y0, x1, y1], fill=255, width=6)
-
-    return image_pil, mask
-
-
 def load_image(image_path):
     # load image
     image_pil = Image.open(image_path).convert("RGB")  # load image
@@ -165,41 +123,14 @@ def get_grounding_output(model, image, caption, box_threshold, text_threshold=No
 
 
 def compute_rects(config_file, checkpoint_path):
-    parser = argparse.ArgumentParser("Grounding DINO example", add_help=True)
-    
-    parser.add_argument(
-        "--output_dir", "-o", type=str, default="outputs", help="output directory"
-    )
-
-    parser.add_argument("--box_threshold", type=float, default=0.3, help="box threshold")
-    parser.add_argument("--text_threshold", type=float, default=0.25, help="text threshold")
-    parser.add_argument("--token_spans", type=str, default=None, help=
-                        "The positions of start and end positions of phrases of interest. \
-                        For example, a caption is 'a cat and a dog', \
-                        if you would like to detect 'cat', the token_spans should be '[[[2, 5]], ]', since 'a cat and a dog'[2:5] is 'cat'. \
-                        if you would like to detect 'a cat', the token_spans should be '[[[0, 1], [2, 5]], ]', since 'a cat and a dog'[0:1] is 'a', and 'a cat and a dog'[2:5] is 'cat'. \
-                        ")
-
-    parser.add_argument("--cpu-only", action="store_true", help="running on cpu only!, default=False")
-    args = parser.parse_args()
-
     # cfg
-    output_dir = args.output_dir
-    box_threshold = args.box_threshold
-    text_threshold = args.text_threshold
-    token_spans = args.token_spans
+    box_threshold = 0.3
+    text_threshold = 0.25
 
-    filepaths, video_to_frame_indices_map, frame_idx_to_frame_path_map, frame_path_to_frame_idx_map = pt.get_MVK_metadata()
+    filepaths, _, _, _ = pt.get_MVK_metadata()
 
-    # set the text_threshold to None if token_spans is set.
-    if token_spans is not None:
-        text_threshold = None
-        print("Using token_spans. Set the text_threshold to None.")
-
-    # make dir
-    os.makedirs(output_dir, exist_ok=True)
     # load model
-    model = load_model(config_file, checkpoint_path, cpu_only=args.cpu_only)
+    model = load_model(config_file, checkpoint_path)
 
     with open("nounlist.txt", "r") as nouns_file:
         nouns = nouns_file.read().splitlines()
@@ -207,19 +138,15 @@ def compute_rects(config_file, checkpoint_path):
     # all classes joined by " . " in a single string
     classes = " . ".join(nouns)
 
+    i = 0
+    detection_boxes = []
     for filepath in filepaths:
-        path_obj = Path(filepath)
-        # make dir
-        dir_path = os.path.join(output_dir, path_obj.parent.name)
-        out_path = os.path.join(dir_path, path_obj.name)
-        os.makedirs(os.path.join(dir_path), exist_ok=True)
-
         # load image
         image_pil, image = load_image(filepath)
 
         # run model
         boxes_filt, pred_phrases = get_grounding_output(
-            model, image, classes, box_threshold, text_threshold, cpu_only=args.cpu_only, token_spans=eval(f"{token_spans}")
+            model, image, classes, box_threshold, text_threshold
         )
 
         # visualize pred
@@ -230,7 +157,9 @@ def compute_rects(config_file, checkpoint_path):
             "labels": pred_phrases,
         }
 
-        print(get_boxes(pred_dict))
+        detection_boxes.append(get_boxes(pred_dict))
+        i += 1
+        if i % 100 == 0:
+            print(i, flush=True)
 
-        # image_with_box = plot_boxes_to_image(image_pil, pred_dict)[0]
-        # image_with_box.save(out_path)
+    pt.write_detection_boxes(detection_boxes)
