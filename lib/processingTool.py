@@ -291,7 +291,31 @@ def make_dict_path(dict: dict, *keys: str):
 
 # returns a list of all evaluated embedding configurations
 def get_optimal_embed_configs():
-  return derived_dataset_embeddings_config["embedConfigs"]
+  embed_configs = []
+  for raw_config in derived_dataset_embeddings_config["embedConfigs"]:
+    for box_enlargements in raw_config["box_enlargements"]:
+      for skippable in raw_config["skippable"]:
+        for model_year in raw_config["model_year"]:
+            embed_configs.append({
+              "skippable": skippable,
+              "box_enlargements": box_enlargements,
+              "model_year": model_year,
+            })
+
+  return embed_configs
 
 def get_static_embed_configs():
-  return static_embeddings_config["embedConfigs"]
+  embed_configs = []
+  for raw_config in static_embeddings_config["embedConfigs"]:
+    for model_year in raw_config["model_year"]:
+      for skippable in raw_config["skippable"]:
+        for pertubation_factor in raw_config["pertubation_factor"]:
+          for kind in raw_config["kind"]:
+            embed_configs.append({
+              "skippable": skippable,
+              "kind": kind,
+              "model_year": model_year,
+              "pertubation_factor": pertubation_factor,
+            })
+
+  return embed_configs
