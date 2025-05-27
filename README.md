@@ -1,4 +1,25 @@
-# V3 Grid Scripts
+# Localization Research Project
+
+This repository contains the documentation, results, and code used in the scope of the research project "The influence of localization on video search engine performance".
+The goal of this project was to implement a set of tools used to analyze the performance of sub-image search for video search engines utilizing text-to-image similarity models.
+Several tools were devised, but generally all tools are computationally intensive and were run for several months on a server dedicated to GPU computation.
+The detailed specification of this project can be found here TODO.
+
+# Introduction
+
+CLIP-based text-to-image search models form the backbone of modern video search endgines.
+They allow users to prompt vast video databases with textual queries, yielding accurate results.
+However, it is not always possible to formulate effective text queries when searching in video domains requiring expert knowledge.
+Competitions like the Video Browser Showdown (VBS) demonstrate this challenge by requiring competitors to search in datasets of medical or marine footage, fueling the development of search techniques that do not rely on text alone.
+
+This study was conducted due to the promising results shown in its pre-study, which focused on sub-image search using a static grid.
+Instead of writing prompts for the whole image, grid-based sub-image search allows to specify what part of the image should be searched, removing visual context that is not needed for the query.
+Because of the pre-study, an existing video search system called PraK was extended with grid-search functionality, which was subsequently used in the 2025 round of VBS.
+The pre-study was summarized in the paper detailing the system TODO:cite.
+
+
+
+
 
 A collection of scripts intended for the analysis of grid search in image search engines.
 The scripts are currently WIP.
