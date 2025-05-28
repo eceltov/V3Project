@@ -46,8 +46,12 @@ def get_dynamic_embeddings(frame_idx, rects: list[list], model, preprocess):
       preprocessed = preprocess(frame_section).unsqueeze(0).to(pt.device)
       embeds.append(model.encode_image(preprocessed).to('cpu'))
 
-    concat = torch.concat(embeds)
-    return concat
+  # return empty tensor if there are no detections
+  if len(embeds) == 0:
+    return torch.tensor([])
+
+  concat = torch.concat(embeds)
+  return concat
 
 def save_all_dynamic_embeddings(rects: list[list[list]], embed_config):
   """Calculates all detection embeddings and saves them.
