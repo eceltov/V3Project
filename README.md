@@ -33,9 +33,10 @@ Although different similarity measurements exist, this study uses only cosine-si
 In video search, this usually takes the form of ranking the individual video frame embeddings based on their similarity to the embedding of a textual user query.
 The result of similarity search is a list of frame indices ranked from the most to least similar to the query.
 - **Sub-image search**: A specialization of similarity search that utilizes parts of an image instead of the whole image.
-- **Grid**, **grid segments**, **grid-search**: A grid is a static partitioning used for all frames of a video dataset.
+- **Grid**, **grid segments**, **grid-search**: A grid is a static partitioning of dataset frames.
 The partitions are referred to as grid segments, and grid-search is a realization of sub-image search where frames cropped to a selected grid segment are compared with the query.
-Traditional whole-image search can be seen as grid-search using a single grid segment of the size of the whole image.
+Traditional whole-image search can be seen as grid-search using a single grid segment of the size of the whole image for each frame.
+This study describes two kinds of grid search; one utilizing a static grid for all frames, and another one that uses a different grid for each frame.
 - **Textual localization**: Textual localization is the technique of explicitly adding spatial information into the textual user query.
 An example user query without textual localization could be: *A yellow fish*; and with textual localization: *A yellow fish in the upper left corner of the image*.
 - **Annotations**: Data collected during the user study.
@@ -92,6 +93,11 @@ The main reason for requiring two descriptions was to analyze whether longer des
 ![OoI lengths](./figures/lengths_char.png)
 ![OoI lengths](./figures/lengths_words.png)
 
+Finally, the graph below shows the distribution of annotation bounding boxes.
+Although the density slightly differs for the skippable and non-skippable annotations, it is not considered significant.
+
+![Bounding Box Density](./figures/density.png)
+
 # Baseline Analysis
 
 This section will analyze non-localized similarity search, which will serve as a baseline for comparison with the other search methodologies.
@@ -108,8 +114,6 @@ In such search engines, the user provides a textual query and is presented with 
 The performance of the search is measured by how long the user has to scroll to find the target frame, analogous to finding the rank of the target (annotation) frame in the sorted list.
 
 <img src="./figures/sim_search.png" alt="Similarity Search" width="1000"/>
-
-This evaluation approach is used for the other search methodologies as well.
 
 ## Results
 
@@ -128,42 +132,42 @@ Although both graphs contain the same data, the first graph shows that, most of 
 ![Model and Length Comparison](./figures/model_comparison_detail.png)
 
 A hypothesis was made that this is due to how good queries are.
-If the target frame (object) can be uniquely described with a textual query, it will rank at the top no matter how good the underlying model is.
+If the target frame (object) can be uniquely described with a textual query, it will rank at the top even when using weaker models.
 Otherwise, the frame will rank somewhere among all other frames for which the query holds, in which case the stronger models prune false positives more effectively.
 This claim is supported by the following graphs made from non-skippable annotations.
-Notice the difference in the uncropped graph; the long queries using the 2024 model dominate the short queries of the 2025 model much longer than in the case of skippable frame.
-Because non-skippable annotations annotate much harder to describe objects, short queries like *two rocks* and *coral* are much more common, and stronger model struggles to filter out false positives TODO:continue here  do not hold enough information to 
+Notice the difference in the uncropped graph; the long queries using the 2024 model dominate the short queries of the 2025 model much longer than in the case of skippable frames.
+Because non-skippable annotations contain harder to describe objects, short descriptions like *two rocks* and *coral* are much more common, and the stronger model struggles to filter out false positives, whereas long queries contain more discernible information that leads to better ranks.
 
 ![Model and Length Comparison](./figures/model_comparison_non_skippable.png)
 ![Model and Length Comparison](./figures/model_comparison_detail_non_skippable.png)
 
 
-
 Because this study aims to analyze similarity search methodologies for the purpose of finding good candidates for actual implementation in a video search engine, only a short prefix of the returned lists sorted by similarity will be considered.
 The top ranking search results are the most relevant; a video search engine user would not scroll through all 84 thousand returned frames.
 TODO: cite lokoc study
-Due to this, all following graphs will be bounded to the maximum rank of 100.
-Subsequently, the y-axis will be bound to 40 % so that all presented graphs are easily comparable. 
+Due to this, all following graphs will be bound to the maximum rank of 100.
+Subsequently, the y-axis will be bound to 40 % so that all presented graphs are easily comparable.
 
-# Static Grid Analysis
+# Static Grid and Textual Analysis
 
-This section will detail how the static grid analysis was conducted, discuss its results, and compare them to non-localized similarity search (a baseline for all comparisons), as well as similarity search using textual localization.
+This section will detail how the static grid analysis was conducted, discuss its results, and compare them to the baseline.
+Additionally, textual localization will be analyzed, as is in many ways similar to a static grid.
 
 ## Evaluation
 
-First, it is essential to understand the evaluation process, which is depicted on the figure below.
-1. The evaluation algorithm ingests the MVK dataset, a grid that is being evaluated, and a specific annotation (the picture with a shark on the figure).
-2. Intersection-over-union (IoU) is computed for each grid segment with the annotation rectangle, and the segment with the highest IoU is selected.
-3. The MVK dataset is cropped to the dimensions of the selected segment and a similarity search is conducted with the annotation description, yielding a list of frame indices sorted by similarity.
-4. The rank (position) of the annotated frame in the list is identified and used as the final score for this annotation (note that each annotation yields two scores, one for the short description and one for the long one).
-
-This evaluation approach simulates the performance of real video search engines.
-In such search engines, the user provides a textual query and is presented with a sorted list of frames most similar to it.
-The performance of the search is measured by how long the user has to scroll to find the target frame, analogous to finding the rank of the target (annotation) frame in the sorted list.
+The evaluation of the static grid is mostly identical to the baseline evaluation, as shown on the diagram below.
+Alongside the dataset and annotation, a specific grid is provided as well.
+Before the similarity search is conducted, the intersection-over-union (IoU) is computed for each grid segment with the annotation rectangle, and the segment with the highest IoU is selected; the MVK dataset is then cropped to the dimensions of the selected segment.
+Similarity search then uses the cropped MVK dataset to find the rank of the annotated frame.
 
 ![Grid Search](./figures/grid_search.png)
 
-This evaluation approach is used for the other localization methods as well; they differ only in how they produce the set of frames used in the similarity search.
+Note that this evaluation approach is comparable to the one used on the baseline.
+No frames were omitted during similarity search, they were only cropped to a specific region.
+This approach will also be applied in the dynamic and theoretical analysis; only a different cropping function will be used.
+
+The evalation process for textual localization is based off the one used for the static grid.
+An input grid is provided and IoU is computed; however, instead of cropping the MVK frames, the selected grid segment will be represented with a textual suffix that will be appended to the query.
 
 ## Grids
 
@@ -180,24 +184,127 @@ An overlap of 10 % means that each grid segment had its sides prolonged by 10 % 
 
 ![Overlap](./figures/overlap.png)
 
+The following overlaps were measured for the 5- and 9-grids.
+
+- 5-grid: 0 %, 10 %, 20 %, 30 %, and 40 %
+- 9-grid: 0 %, 5 %, 10 %, 15 %, 20 %, 25 %, and 40 %.
+
 ## Results
 
-The results will be presented as cumulative graphs with the rank threshold as the x-axis and the percentage of annotations that met this threshold as the y-axis.
-If *n* is the number of frames extracted from the MVK dataset, then the x-axis ranges from 0 to *n*.
-All graphs will clarify what source data was used for their construction, namely:
-- Whether the graph was made with skippable or non-skippable annotations (no graph contains both kinds due to different biases).
-- What CLIP text-to-image model was used (either the model used by PraK in year 2025 or 2024 for the VBS competition).
-- Whether short of long annotation descriptions were used as queries.
-- Whether the annotation bounding boxes were artificially perturbed.
+The graphs below compare the best performing 5- and 9-grid with the baseline and textual localization.
+The 5-grid was chosen for the textual localization, as it still produces reasonably simple suffixes, such as *in the upper left part of the image* or *in the center part of the image"*.
+
+![Static Comparison](./figures/grid_comparison_skippable.png)
+![Static Comparison](./figures/grid_comparison_non_skippable.png)
+
+Both graphs show similar trends, with the second showing significantly worse performance because non-skippable annotations were used.
+Also note that there are almost twice as much skippable annotations, resulting in less variance in the first graph.
+
+Using the 9-grid over the baseline resulted in about 66 % more annotations ranking in the first 100 results, which is a surprisingly high performance increase.
+Another surprising result is that the textual localization performed worse than the baseline, implying that modern text-to-image models are not strong enough to handle localization on their own.
+
+## Perturbation Results
+
+The graphs above used the perfect, user-drawn annotation bounding boxes to select a grid segment.
+However, in a real system, where the user has to draw a bounding box without the image he is trying to find, errors are introduced.
+This study attempts to measure the performance decrease with artificial perturbations applied to annotation bounding boxes.
+
+The perturbations were simulated with gaussian noise applied in the form of shifts (moving the bounding box) and deformations (changing the width and height).
+Both errors are defined with a single parameter, the *perturbation factor*.
+An example perturbation of 0.1 would be translated into the following errors:
+- **shift**: The gaussian distribution with a mean of 0 and a standard deviation of 10 (100 times the perturbation factor) will be sampled twice and applied to the vertical and horizontal position of the bounding box.
+- **deformation**: The gaussian distribution with a mean of 1 and a standard deviation of 0.1 (the perturbation factor) will be sampled twice and multiplied with the width and height of the bounding box.
+
+For each pair of annotation and perturbation factor, five different bounding boxes were produced to reduce the variation of the results.
+The following heatmaps depict the effects of perturbation for the different grid overlap factors and display how many annotations ranked at the top 100 as the recall percentage (effectively the values shown on cumulative graphs at rank 100).
+Note that the color scale differs for skippable and non-skippable annotations.
+
+![Grid Perturbations](./figures/heatmaps.png)
+
+The general trend of the graphs is that perturbation decreases the relative performance of grids with smaller overlaps more.
+This could be interpreted as grids with bigger overlaps being more rigid; more bounding boxes tend to fall into the correct segments.
+
+The takeaway from these graphs is that systems implementing grid search should consider using higher overlaps in case their users tend to draw bounding boxes with significant perturbation.
+An interesting approach would be to dynamically measure the perturbation for each user and employing a grid that best matches their needs on an individual basis.
+
+# Dynamic Analysis
+
+Instead of using a static grid to partition the frames, an object detector could locate objects of interest (OoI) in the dataset and define a custom grid for each frame.
+This approach has the significant advantage that each frame can have a different number of segments based on how many OoIs they contain.
+Additionally, segment sizes are derived from the OoIs, potentially removing much more visual clutter than static grids.
+
+However, this comes with the significant downside of relying on the object detector to detect relevant object.
+Its parameters will have to be fine-tuned to reduce the number of false-positives and false-negatives; and there is always the possibility that the user will search for an object the detector is not trained on.
+
+This study will use the *Grounding DINO* TODO:cite object detector, mainly for its zero-shot detection functionality that does not rely on a predefined list of classes that can be detected.
 
 
-The graph below compares the best performing 5- and 9-grid with the baseline and textual localization.
+## Evaluation
 
-![Cumulative Uncropped](./figures/cumulative_uncropped.png)
+The evaluation process uses the same principles as the static grid evaluation.
+However, instead of selecting a single segment for the whole dataset based on the IoU with the annotation bounding box, the segments are selected on a per-frame basis.
 
-Each graph will contain 
+Because there is no guarantee that there will be a segment with a positive IoU (the object detector could fail to detect anything on a frame), a fallback will be introduced.
+Each frame grid will be appended with a segment spanning the whole frame, resulting in every bounding box having positive IoU with at least the fallback segment.
+Additionally, because of the size of the fallback segment, its IoU with the bounding box will tend to be small, resulting in other segments with significant intersection to be preferred.
+
+## Results
+
+The following graphs compare dynamic approach with the best performing static grids and the baseline.
+Although the same dynamic partitioning was used for both graphs, the first graph shows that the dynamic approach performs about the same as the 5-grid, while the second graph, which uses non-skippable annotations, shows that it starts falling behind.
+This is most likely due to the fact that non-skippable annotations contain objects with much lower objectness, such as rocks and corals, which the object detector filtered out.
+
+![Dynamic](./figures/dynamic.png)
+![Dynamic](./figures/dynamic_non_skippable.png)
+
+Additionally, it was tracked how many times each similarity search had to use the fallback segment for a given frame, meaning there was no detection made by the object detector at the position of the annotation bounding box.
+For skippable frames, the fallback segment was used 27.1 % of the time, while for non-skippable ones 25.4 % of the time.
+Note that this statistic only depends on the dynamic partitioning and the distribution of the annotation bounding boxes, which is similar for both the skippable and non-skippable ones.
+
+# Theoretical Analysis
+
+Finally, the theoretical analysis aims to find the upper performance bound when using grid-based localization.
+Instead of using a static grid for all frames or a different grid for each frame, it utilizes a different grid for each similarity search.
+When the user provides the bounding box for the query, the whole dataset is cropped to that box, ensuring an optimal IoU of 100 % for all frames.
+
+The reason that this approach is considered only theoretical is because it is extremely computationally intensive.
+In the static grid and dynamic approaches, the grid segment embeddings could be precomputed.
+Due to the user-provided bounding box being arbitrary, it is impossible to precompute the embeddings.
+Even a performant *NVIDIA H100* takes around 20 minutes to compute the required embeddings for the MVK dataset, making the system unusable for real-time application.
+
+## Evaluation
+
+The evaluation process is effectivelly the baseline evaluation with a different input dataset.
+This dataset is produced by cropping the MVK dataset to the annotation bounding box, as ilustrated on the diagram below.
+
+The leftmost column represents the frame the user annotated.
+Note that out of the four shark images, only the annotated one remains whole, while two sharks get cropped out entirely.
+Whereas the dynamic approach would produce a segment where the shark in the third column would remain whole, this approach crops a significant portion of it away, lowering its final ranking.
+
+![Theoretical Evaluation](./figures/theoretical.png)
+
+## Results
+
+Over the course of several months, the results for the theoretical analysis were computed.
+The following graphs compare all methods analyzed in this study.
+
+![Final Analysis](./figures/theoretical_graph.png)
+![Final Analysis](./figures/theoretical_graph_non_skippable.png)
+
+The theoretical approach ranks significantly higher than the other; almost two times better than the baseline for skippable annotations, and over two and a half times better for non-skippable annotations.
+Notably, the 9-grid is closer to the theoretical approach than the baseline for skippable frames, although it should be noted that no perturbations were considered in these graphs.
+
+Finally, the last experiment was to test whether enlarging the annotation bounding box improved performance, i.e., whether adding some neighboring visual context helps.
+The following graphs shows that it actually significantly harms the performance.
+
+![Box Sizes](./figures/box_size.png)
+
+In this graph, the box enlargement refers to by how many pixels was the annotation bounding box stretched in all four directions.
+For reference, all MVK frames have the resolution of 682x384.
 
 
+
+todo:mention that dynamic can omit frames
 
 A collection of scripts intended for the analysis of grid search in image search engines.
 The scripts are currently WIP.
@@ -208,11 +315,6 @@ It is recommended to install the packages and run the scripts from a virtual env
 
 ```bash
 python3 -m venv venv
-```
-
-You can activate the environment by running:
-
-```bash
 source venv/bin/activate
 ```
 

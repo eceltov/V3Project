@@ -70,7 +70,13 @@
     "csvPath": "./results/dynamicResults.csv",
     "detectionBoxesPath": "./detectionBoxes",
     "dinoCheckpointPath": "/mnt/c/school/videa/dynamicAnnotation/GroundingDINO/weights/groundingdino_swint_ogc.pth",
-    "dinoConfigPath": "/mnt/c/school/videa/dynamicAnnotation/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+    "dinoConfigPath": "/mnt/c/school/videa/dynamicAnnotation/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py",
+    "embedConfigs": [
+      {
+        "skippable": [true, false],
+        "model_year": ["2025"]
+      }
+    ]
   },
   "frameWidth": 682,
   "frameHeight": 384,
