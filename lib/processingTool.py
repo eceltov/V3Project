@@ -312,7 +312,6 @@ def get_optimal_embed_configs():
               "box_enlargements": box_enlargements,
               "model_year": model_year,
             })
-
   return embed_configs
 
 def get_static_embed_configs():
@@ -328,5 +327,15 @@ def get_static_embed_configs():
               "model_year": model_year,
               "pertubation_factor": pertubation_factor,
             })
+  return embed_configs
 
+def get_dynamic_embed_configs():
+  embed_configs = []
+  for raw_config in dynamic_embeddings_config["embedConfigs"]:
+    for model_year in raw_config["model_year"]:
+      for skippable in raw_config["skippable"]:
+        embed_configs.append({
+          "skippable": skippable,
+          "model_year": model_year,
+        })
   return embed_configs

@@ -70,42 +70,70 @@ def save_all_dynamic_embeddings(rects: list[list[list]], embed_config):
 
   pt.write_dynamic_embeddings(embed_config["model_year"], embed_list)
 
-def search_detection_boxes(annotation_rect: list, text: str, detection_rects: list[list[list]], embed_config) -> torch.Tensor:
-  """Given the list of detection boxes for each dataset frame, finds the best detection box on each frame and ranks them.
+def preprocess_detections(detection_rects: list[list[list]], detection_embeds, embed_config):
+  whole_embeds = pt.read_static_embeddings(embed_config["model_year"], "whole")[0]
+  whole_frame_rect = [0, 0, pt.frame_width, pt.frame_height]
+  for frame_idx in range(pt.get_frame_count()):
+    # add the whole frame as a fallback for when there are no detections
+    detection_rects[frame_idx].append(whole_frame_rect)
+    frame_embeds = torch.reshape(whole_embeds[frame_idx], (1, whole_embeds[frame_idx].shape[0]))
+    detection_embeds[frame_idx] = torch.cat((detection_embeds[frame_idx], frame_embeds), 0)
+
+  """
 
   Args:
       annotation_rect (list): The rectangle drawn by the annotator.
       text (str): The object description provided by the annotator.
       detection_rects (list[list[list]]): A list of a list of rectangles (4 element lists). For each frame in the dataset, a list of detection rectangles. 
-      embed_config (_type_): The configuration used for the embeddings.
 
   Returns:
       Tensor: Returns a 1D tensor of frame indices (sorted from best to worst).
   """
-  selected_box_embeds = []
-  detection_embeds = pt.read_dynamic_embeddings(embed_config["model_year"])
-  model, _, tokenizer = pt.get_model(embed_config["model_year"])
 
+def search_detection_boxes(annotation_rect: list, annotation_frame_idx, texts: list[str], detection_rects: list[list[list]], detection_embeds, model, tokenizer):
+  """Given the list of detection boxes for each dataset frame, finds the best detection box on each frame, ranks them, and finds the rank of the input frame.
+
+  Args:
+      annotation_rect (list): The rectangle drawn by the annotator.
+      annotation_frame_idx (_type_): The frame idx of the annotation.
+      texts (list[str]): The object descriptions provided by the annotator.
+      detection_rects (list[list[list]]): A list of a list of rectangles (4 element lists). For each frame in the dataset, a list of detection rectangles.
+      detection_embeds (_type_): A List of 2D tensors that can be indexed in the same way as the detection_rect.
+      model (_type_): Model used for similarity search.
+      tokenizer (_type_): Tokenizer used for similarity search.
+
+  Returns:
+      Returns a list of ranks matching the input texts and how many frames resorted to the fallback.
+  """
+  selected_box_embeds = []
+  fallback_selected_count = 0
   # for each set of detections in a frame, select the best detection box embeds (based on IoU)
   for frame_idx in range(pt.get_frame_count()):
     box_idx, IoU = rectangles.get_best_IoU_segment_idx(annotation_rect, detection_rects[frame_idx])
     box_embeds = detection_embeds[frame_idx][box_idx]
     selected_box_embeds.append(box_embeds.view(1, box_embeds.shape[0]))
 
+    # count how many times the whole frame was selected
+    if box_idx == len(detection_rects[frame_idx]) - 1:
+      fallback_selected_count += 1
+
   # create tensor from collected box embeds
   selected_box_embeds = torch.concat(selected_box_embeds).to(pt.device)
 
-  query = tokenizer(text).to(pt.device)
+  ranks = []
+  for text in texts:
+    query = tokenizer(text).to(pt.device)
 
-  # find ranks and sort them from best to worst
-  with torch.no_grad(), torch.amp.autocast(pt.device):
-    text_features = model.encode_text(query)
-    distances = 1 - (F.normalize(text_features) @ F.normalize(selected_box_embeds).T)
-    sorted_indices = torch.argsort(distances)[0]
+    # find ranks and sort them from best to worst
+    with torch.no_grad(), torch.amp.autocast(pt.device):
+      text_features = model.encode_text(query)
+      distances = 1 - (F.normalize(text_features) @ F.normalize(selected_box_embeds).T)
+      sorted_indices = torch.argsort(distances)[0].tolist()
+      rank = sorted_indices.index(annotation_frame_idx)
+      ranks.append(rank)
+  return ranks, fallback_selected_count
 
-  return sorted_indices
-
-def get_file_results(file_id, embed_config):
+def get_file_results(file_id, detection_rects, detection_embeds, model, tokenizer, embed_config):
   annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
 
   result_list = []
@@ -113,12 +141,23 @@ def get_file_results(file_id, embed_config):
     annotation_id = annotation["id"]
 
     frame_idx = annotation["frameIdx"]
+    frame_rect = annotation["rect"]
+    desc_short = annotation["desc_short"]
+    desc_long = annotation["desc_long"]
+
+    texts = [desc_short, desc_long]
+    ranks, fallback_count = search_detection_boxes(frame_rect, frame_idx, texts, detection_rects, detection_embeds, model, tokenizer)
     result_list.append({
       "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
       "skippable": embed_config["skippable"],
       "annotation_id": annotation_id,
       "model_year": embed_config["model_year"],
       "frame_idx": frame_idx,
+      "rank_short": ranks[0],
+      "rank_long": ranks[1],
+      "fallback_count": fallback_count,
+      "annotation_rect_area": rectangles.get_area(frame_rect),
     })
 
+    print("#", end="", flush=True)
   return result_list

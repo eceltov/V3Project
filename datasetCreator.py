@@ -69,21 +69,16 @@ def save_static_grid_results():
 
 def save_dynamic_grid_results():
   results = ResultAggregator()
-  embed_config = {
-    "model_year": "2025",
-    "skippable": False,
-  }
+  for embed_config in pt.get_dynamic_embed_configs():
+    detection_rects = pt.read_detection_boxes()
+    detection_embeds = pt.read_dynamic_embeddings(embed_config["model_year"])
+    dat.preprocess_detections(detection_rects, detection_embeds, embed_config)
 
-  ranks = np.load("./rank_index.npy")
-
-  for file_id in range(len(filenames[embed_config["skippable"]])):
-    file_results = dat.get_file_results(file_id, embed_config)
-    results.append_results(file_results)
-
-  for annotation_idx in range(len(results.results)):
-    results.results[annotation_idx]["rank"] = ranks[annotation_idx]
-    results.results[annotation_idx]["description_kind"] = "long"
-
+    model, _, tokenizer = pt.get_model(embed_config["model_year"])
+    for file_id in range(len(filenames[embed_config["skippable"]])):
+      file_results = dat.get_file_results(file_id, detection_rects, detection_embeds, model, tokenizer, embed_config)
+      results.append_results(file_results)
+      print(".", end="", flush=True)
   results.to_csv(pt.dynamic_csv_path)
 
-save_static_grid_results()
+save_dynamic_grid_results()
