@@ -207,6 +207,19 @@ Finally, the last experiment was to test whether enlarging the annotation boundi
 
 In this graph, **box enlargement** refers to how many pixels the annotation bounding box was stretched in all four directions. For reference, all MVK frames have a resolution of 682x384.
 
+# Publications and Results
+
+This study found that sub-image search methodologies can significantly improve search performance, and it contextualized these findings with a theoretical upper bound.
+
+The **9-grid** emerged as a more performant alternative to whole-image search. It is simple to implement and remains reasonably user-friendly, requiring users to either specify a segment or draw a bounding box using an interface element.
+
+Although the **dynamic approach** performed worse, its effectiveness is directly tied to the object detector used. This suggests that further fine-tuning or the use of more advanced models could significantly boost its performance.
+
+A surprising finding was the **reduced performance of textual queries**, implying that explicitly specifying the locality of searched objects might actually cause more harm than benefit.
+
+
+Finally, this study laid the groundwork for two papers currently being submitted to the **SISAP 2025 conference**. The first paper [6] summarizes the improvements achieved by using static grids and details the data collection process. The second paper [7] focuses on the dynamic approach and compares it to the results obtained from the theoretical analysis.
+
 # Project Structure and Usage
 
 This project is structured as a collection of scripts, reflecting the diverse nature of its computations. The general workflow is divided into a **long precomputation phase**, where necessary embeddings and detection rectangles are generated, and a **shorter evaluation phase**, which produces CSV datasets for analysis.
@@ -267,6 +280,8 @@ The `lib` folder contains various function collections used by the previously me
 - `boundaries.py`: Contains definitions for various grid segments used by the static grid and textual analysis.
 - `rectangles.py`: Contains several utility functions for rectangle manipulation, such as IoU computation and rectangle perturbation.
 
+Finally, the `graphs.ipynb` Jupyter Notebook ingests the produced CSV datasets to produce the various graphs found in this study.
+
 ## Usage
 
 The scripts placed directly in the main repository folder can be run as-is.
@@ -284,3 +299,7 @@ Note that the `computeDetectionRects.py` script requires the Grounding DINO pack
 [4] Retrieval Optimized CLIP Models. Available also from: https://github.com/Visual-Computing/MCIP
 
 [5] Liu, Shilong; Zeng, Zhaoyang; Ren, Tianhe; Li, Feng; Zhang, Hao; Yang, Jie; Li, Chunyuan; Yang, Jianwei; Su, Hang; Zhu, Jun, et al. Grounding dino: Marrying dino with grounded pre-training for open-set object detection. arXiv preprint arXiv:2303.05499. 2023
+
+[6] Jäckl, Bastian; Kloda, Vojtěch; Keim, Daniel A.; Lokoč, Jakub; Experimental evaluation of static image sub-region based search models using CLIP. Submitted to SISAP 2025.
+
+[7] Jäckl, Bastian; Kloda, Vojtěch; Keim, Daniel A.; Lokoč, Jakub; Dynamic Sub-region Search in Homogeneous Collections Using CLIP. Submitted to SISAP 2025.
