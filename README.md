@@ -201,11 +201,12 @@ Over the course of several months, the results for the theoretical analysis were
 
 The theoretical approach ranks significantly higher than the others; almost two times better than the baseline for skippable annotations, and over two and a half times better for non-skippable annotations. Notably, the 9-grid is closer to the theoretical approach than the baseline for skippable frames, although it should be noted that no perturbations were considered in these graphs.
 
-Finally, the last experiment was to test whether enlarging the annotation bounding box improved performance, i.e., whether adding some neighboring visual context helps. The following graphs show that it actually significantly harms the performance.
+Finally, the last experiment was to test whether enlarging the annotation bounding box improved performance of the theoretical approach, i.e., whether adding some neighboring visual context helps. The following graph shows that it actually significantly harms the performance.
 
 ![Box Sizes](./figures/box_size.png)
 
 In this graph, box enlargement refers to how many pixels the annotation bounding box was stretched in all four directions. For reference, all MVK frames have a resolution of 682x384.
+Due to how long the computation takes, a similar graph for skippable annotations was not produced.
 
 # Publications and Results
 
