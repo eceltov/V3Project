@@ -3,7 +3,7 @@
 This repository contains the documentation, results, and code used in the scope of the research project "The influence of localization on video search engine performance".
 The goal of this project was to implement a set of tools used to analyze the performance of sub-image search for video search engines utilizing text-to-image similarity models.
 Several tools were devised, but generally all tools are computationally intensive and were run for several months on a server dedicated to GPU computation.
-The detailed specification of this project can be found here TODO.
+The detailed specification of this project can be found [here](./specification.pdf).
 
 # Introduction
 
@@ -15,14 +15,14 @@ Competitions like the Video Browser Showdown (VBS) demonstrate this challenge by
 This study was conducted due to the promising results shown in its pre-study, which focused on sub-image search using a static grid.
 Instead of writing prompts for the whole image, grid-based sub-image search allows to specify what part of the image should be searched, removing visual context that is not needed for the query.
 Because of the pre-study, an existing video search system called PraK was extended with grid-search functionality, which was subsequently used in the 2025 round of VBS.
-The pre-study was summarized in the paper detailing the system TODO:cite.
+The pre-study was summarized in the paper detailing the system [1].
 
 This study conducts a more rigorous investigation into how various sub-image search methodologies perform.
-To be able to compare them, a study was held which tasked attendees of various backgrounds to annotate random frames from the Marine Video Kit (MVK) dataset TODO:cite.
+To be able to compare them, a study was held which tasked attendees of various backgrounds to annotate random frames from the Marine Video Kit (MVK) dataset [2].
 The collected data served to simulate users using a real video search engine with a simple performance metric that can be measured for all sub-image search methodologies analyzed in this study.
-These were, in no particular order, textual localization, grid-based localization, localization based on object detectors, and a theoretically optimal static localization method that served as the upper performance ceiling.
+These were, in the order presented in this study, static grid-based localization, textual localization, localization based on object detectors, and a theoretically optimal static localization method that served as the upper performance ceiling.
 
-Two CLIP text-to-image were evaluated in this study, namely the TODO:find out, used by the PraK system in the 2024 round of VBS and TODO:find out, used in VBS 2025.
+Two CLIP text-to-image were evaluated in this study, namely the *laion/CLIP-ViT-H-14-laion2B-s32B-b79K* [3] used by the PraK system in the 2024 round of VBS, and *ViT-SO400M-14-SigLIP-384* [4] used in VBS 2025.
 
 # Used Terms
 
@@ -65,7 +65,7 @@ The user could then either go to the next frame, or annotate another object on t
 
 The user study was conducted in two iterations.
 Initially, only the annotator that allowed skipping frames was presented to the users, but it was later reasoned that allowing users to skip frames would lead to biases that could not be easily mitigated, such as a lack of annotations of hard to describe objects (i.e., frames containing only rocks).
-Therefore, the second annotator was made and distributed to the users alongside new instructions, which had the sole addition of the paragraph detailing the second annotator (TODO: fact check whether it is a single paragraph).
+Therefore, the second annotator was made and distributed to the users.
 
 In total, 12 users partook in the study, half of which had prior experience with localization research, and the other half had no knowledge of the field.
 741 unique annotations were collected, 486 of which were obtained with the annotator that allowed to skip frames (skippable annotations), and the remaining 255 were obtained with the annotator that forced the users to annotate at least one object per frame (non-skippable annotations).
@@ -90,8 +90,7 @@ The following graphs display the lengths of user descriptions in characters and 
 Although the descriptions are shorter than the text hints on average, this was not considered an issue.
 The main reason for requiring two descriptions was to analyze whether longer descriptions improve performance, and not to study their exact relationship.
 
-![OoI lengths](./figures/lengths_char.png)
-![OoI lengths](./figures/lengths_words.png)
+![OoI lengths](./figures/lengths.png)
 
 Finally, the graph below shows the distribution of annotation bounding boxes.
 Although the density slightly differs for the skippable and non-skippable annotations, it is not considered significant.
@@ -129,7 +128,6 @@ The graphs below compare the different models and description lengths; the secon
 Although both graphs contain the same data, the first graph shows that, most of the time, the 2025 model dominates the 2024 model, whereas the cropped graph shows that long descriptions dominate short ones at the beginning of the cumulative function.
 
 ![Model and Length Comparison](./figures/model_comparison.png)
-![Model and Length Comparison](./figures/model_comparison_detail.png)
 
 A hypothesis was made that this is due to how good queries are.
 If the target frame (object) can be uniquely described with a textual query, it will rank at the top even when using weaker models.
@@ -139,12 +137,9 @@ Notice the difference in the uncropped graph; the long queries using the 2024 mo
 Because non-skippable annotations contain harder to describe objects, short descriptions like *two rocks* and *coral* are much more common, and the stronger model struggles to filter out false positives, whereas long queries contain more discernible information that leads to better ranks.
 
 ![Model and Length Comparison](./figures/model_comparison_non_skippable.png)
-![Model and Length Comparison](./figures/model_comparison_detail_non_skippable.png)
-
 
 Because this study aims to analyze similarity search methodologies for the purpose of finding good candidates for actual implementation in a video search engine, only a short prefix of the returned lists sorted by similarity will be considered.
 The top ranking search results are the most relevant; a video search engine user would not scroll through all 84 thousand returned frames.
-TODO: cite lokoc study
 Due to this, all following graphs will be bound to the maximum rank of 100.
 Subsequently, the y-axis will be bound to 40 % so that all presented graphs are easily comparable.
 
@@ -194,8 +189,7 @@ The following overlaps were measured for the 5- and 9-grids.
 The graphs below compare the best performing 5- and 9-grid with the baseline and textual localization.
 The 5-grid was chosen for the textual localization, as it still produces reasonably simple suffixes, such as *in the upper left part of the image* or *in the center part of the image"*.
 
-![Static Comparison](./figures/grid_comparison_skippable.png)
-![Static Comparison](./figures/grid_comparison_non_skippable.png)
+![Static Comparison](./figures/grid_comparison.png)
 
 Both graphs show similar trends, with the second showing significantly worse performance because non-skippable annotations were used.
 Also note that there are almost twice as much skippable annotations, resulting in less variance in the first graph.
@@ -236,7 +230,7 @@ Additionally, segment sizes are derived from the OoIs, potentially removing much
 However, this comes with the significant downside of relying on the object detector to detect relevant object.
 Its parameters will have to be fine-tuned to reduce the number of false-positives and false-negatives; and there is always the possibility that the user will search for an object the detector is not trained on.
 
-This study will use the *Grounding DINO* TODO:cite object detector, mainly for its zero-shot detection functionality that does not rely on a predefined list of classes that can be detected.
+This study will use the *Grounding DINO* [5] object detector, mainly for its zero-shot detection functionality that does not rely on a predefined list of classes that can be detected.
 
 
 ## Evaluation
@@ -255,7 +249,6 @@ Although the same dynamic partitioning was used for both graphs, the first graph
 This is most likely due to the fact that non-skippable annotations contain objects with much lower objectness, such as rocks and corals, which the object detector filtered out.
 
 ![Dynamic](./figures/dynamic.png)
-![Dynamic](./figures/dynamic_non_skippable.png)
 
 Additionally, it was tracked how many times each similarity search had to use the fallback segment for a given frame, meaning there was no detection made by the object detector at the position of the annotation bounding box.
 For skippable frames, the fallback segment was used 27.1 % of the time, while for non-skippable ones 25.4 % of the time.
@@ -274,8 +267,8 @@ Even a performant *NVIDIA H100* takes around 20 minutes to compute the required 
 
 ## Evaluation
 
-The evaluation process is effectivelly the baseline evaluation with a different input dataset.
-This dataset is produced by cropping the MVK dataset to the annotation bounding box, as ilustrated on the diagram below.
+The evaluation process is effectively the baseline evaluation with a different input dataset.
+This dataset is produced by cropping the MVK dataset to the annotation bounding box, as illustrated on the diagram below.
 
 The leftmost column represents the frame the user annotated.
 Note that out of the four shark images, only the annotated one remains whole, while two sharks get cropped out entirely.
@@ -289,7 +282,6 @@ Over the course of several months, the results for the theoretical analysis were
 The following graphs compare all methods analyzed in this study.
 
 ![Final Analysis](./figures/theoretical_graph.png)
-![Final Analysis](./figures/theoretical_graph_non_skippable.png)
 
 The theoretical approach ranks significantly higher than the other; almost two times better than the baseline for skippable annotations, and over two and a half times better for non-skippable annotations.
 Notably, the 9-grid is closer to the theoretical approach than the baseline for skippable frames, although it should be noted that no perturbations were considered in these graphs.
@@ -302,12 +294,10 @@ The following graphs shows that it actually significantly harms the performance.
 In this graph, the box enlargement refers to by how many pixels was the annotation bounding box stretched in all four directions.
 For reference, all MVK frames have the resolution of 682x384.
 
+# Project
 
-
-todo:mention that dynamic can omit frames
-
-A collection of scripts intended for the analysis of grid search in image search engines.
-The scripts are currently WIP.
+This project is structured as a loose collection of scripts due to the heterogenous nature of the computations.
+The general workflow is divided into a long precomputation phase, where the necessary embeddings and detection rectangles are inferred, and a shorter evaluation phase, which yields CSV datasets used for analysis. 
 
 ## Installation
 
@@ -316,17 +306,27 @@ It is recommended to install the packages and run the scripts from a virtual env
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-```
-
-To install dependencies, run:
-
-```bash
 python3 -m pip install -r requirements.txt
 ```
 
-The scripts require a folder with MVK frames and annotations that are not part of this repo.
+The scripts require a folder with MVK frames and annotations that are not part of this repository.
 Please contact the maintainer for the data.
 The paths to these folders need to be configured in `config.json` under the `datasetPath` and `annotationsDir` keys.
+
+## Configuration
+
+To configure the scripts, you can edit values in the `config.json` file.
+
+The most impactful configuration is presented under the *embedConfigs* keys, which dictates what embeddings will be computed and evaluated.
+This key can be found in the *derivedDatasetEmbeddings* (theoretical analysis), *staticEmbeddings* (static grid analysis) and *dynamicEmbeddings* (dynamic analysis) sections of the configuration.
+In is structured as a list of objects with the following keys:
+- *skippable*: What annotations should be used (skippable, non-skippable).
+- *model_year*: What text-to-image model should be used.
+- *box_enlargements*: For the theoretical analysis, how much should the annotation bounding box be enlarged.
+- *kind*: For the static grid analysis, what grids should be used.
+- *perturbation_factor*: For the static grid analysis, what perturbation should be applied to the annotation bounding boxes.
+
+The rest of the configuration is mostly paths that do not need to be changed and metadata like frame dimensions.
 
 ## Scripts
 
@@ -336,19 +336,21 @@ The following scripts either create embeddings for the analysis, or produce a da
 Contains a function for each dataset type (annotation, static analysis, dynamic analysis, theoretical analysis).
 
 - `computeTheoreticalEmbeddings.py`: Creates derived embedding files from annotations.
-Takes a really long time for a single file (more than an hour).
+Very computationally intensive, a single annotation file can take several hours to compute.
 Due to this, it is intended to be run on multiple nodes.
 Takes two arguments; the serial number of the node (0-based) and the total number of nodes running the script.
-Each node may be assigned a different number of embeddings to compute, but the script guarantees that two nodes will not work on the same file, as long as they have a different serial number and the same total number of nodes in the launch parameters.
+Each node will have a subset of annotations assigned to it, and the script guarantees that two nodes will not work on the same annotations as long as they have a different serial number and the same total number of nodes in the launch parameters.
 This holds even when the nodes start running at different times.
-It is recommended to use a prime numbers for the total number of nodes and change this number to a different prime with every batch to balance the work without much effort (a node is meant more as a job submission rather than a physical machine).
-Calling the `debug_print_task_counts()` function will print out how many tasks will be assigned to each node.
+It is recommended to use prime numbers for the total number of nodes and change this number to a different prime with every batch to balance the work (a node is meant more as a job submission rather than a physical machine).
 
-- `computeStaticEmbeddings.py`: Creates static segmentation embedding files.
+- `computeStaticEmbeddings.py`: Creates static grid embedding files.
 The function call inside the file can be used with different parameters.
-Use either "2024" or "2025" for the model year and "whole" or "centerpiece_overlap" for the segmentation kind.
+Use either "2024" or "2025" for the model year and "whole" or "centerpiece_overlap" for the segmentation kind followed with the desired overlap percentage.
 
-- `computeDynamicEmbeddings.py`: Currently WIP.
+- `computeDetectionRects.py`: Uses the Grounding DINO object detector to find objects in frames.
+Yields a file with bounding boxes.
+
+- `computeDynamicEmbeddings.py`: Ingests the bounding box file computed in `computeDetectionRects.py` and calculates embeddings for all grid segments.
 
 The scripts inside the `annotators` folder are the annotation tools used for the study.
 
@@ -356,10 +358,23 @@ The `lib` folder contains various function collections used by the previously me
 
 - `processingTool.py`: Contains the main infrastructure functions for config loading, annotation retrieval and embedding file I/O.
 - The various `analysisTools`: Contain the implementations for how the embeddings are created and datasets derived.
-- `boundaries.py`: Contains definitions for various grid segments used by the static analysis.
-- `rectangles.py`: Contains several utility functions for rectangle manipulation.
+- `boundaries.py`: Contains definitions for various grid segments used by the static grid and textual analysis.
+- `rectangles.py`: Contains several utility functions for rectangle manipulation, such as IoU computation and rectangle perturbation.
 
 ## Usage
 
-The scripts placed directly in the main repo folder can be run as-is.
+The scripts placed directly in the main repository folder can be run as-is.
 Make sure you run them from that folder so that the relative paths in `config.json` hold.
+
+Note that the `computeDetectionRects.py` script requires the Grounding DINO package, that is installed directly from the Grounding DINO repository found [here](https://github.com/IDEA-Research/GroundingDINO).
+
+# References
+[1] Stroh, Michael; Kloda, Vojtěch; Verner, Benjamin; et al. PraK Tool V3: Enhancing Video Item Search Using Localized Text and Texture Queries. In: Ide, Ichiro; Kompatsiaris, Ioannis; Xu, Changsheng; Yanai, Keiji; Chu, Wei-Ta; Nitta, Naoko; Riegler, Michael; Yamasaki, Toshihiko (eds.). MultiMedia Modeling. Singapore: Springer Nature Singapore, 2025, pp. 326–333. isbn 978-981-96-2074-6.
+
+[2] Truong, Quang-Trung; Vu, Tuan-Anh; Ha, Tan-Sang; Jakub, Lokoc; Tim, Yue Him Wong; Joneja, Ajay; Yeung, Sai-Kit. Marine Video Kit: A New Marine Video Dataset for Content-based Analysis and Retrieval. 2022. Available from arXiv: 2209.11518 [cs.CV].
+
+[3] laion/CLIP-ViT-H-14-laion2B-s32B-b79K. Available also from: https://https://huggingface.co/laion/CLIP-ViT-H-14-laion2B-s32B-b79K
+
+[4] Retrieval Optimized CLIP Models. Available also from: https://github.com/Visual-Computing/MCIP
+
+[5] Liu, Shilong; Zeng, Zhaoyang; Ren, Tianhe; Li, Feng; Zhang, Hao; Yang, Jie; Li, Chunyuan; Yang, Jianwei; Su, Hang; Zhu, Jun, et al. Grounding dino: Marrying dino with grounded pre-training for open-set object detection. arXiv preprint arXiv:2303.05499. 2023
