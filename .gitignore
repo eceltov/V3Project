@@ -5,6 +5,5 @@ features*/
 *.pth
 *.pt
 annotation*
-*.txt
 results
 report.html
