@@ -40,7 +40,7 @@ def save_annotations():
   df = df.loc[without_annotation_id.astype(str).drop_duplicates().index]
   df.to_csv(pt.annotation_csv_path, index=False)
 
-def save_optimal_grid_results():
+def save_theoretical_results():
   results = ResultAggregator()
   for embed_config in pt.get_optimal_embed_configs():
     model, _, tokenizer = pt.get_model(embed_config["model_year"])
