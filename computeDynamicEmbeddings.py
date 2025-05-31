@@ -3,9 +3,9 @@ import datetime
 print(f"Job started at: {datetime.datetime.now()}")
 
 import lib.dynamicAnalysisTool as dat
-import lib.processingTool as pt
+import lib.databaseGateway as db
 
-rects = pt.read_detection_boxes()
+rects = db.read_detection_boxes()
 
 embed_config = {
   "model_year": "2025",

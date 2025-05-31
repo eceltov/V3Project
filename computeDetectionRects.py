@@ -1,4 +1,4 @@
-import lib.groundingDINO as detector
-import lib.processingTool as pt
+import lib.groundingDinoDetector as detector
+import lib.configurationProvider as config
 
-detector.compute_rects(pt.dino_config_path, pt.dino_checkpoint_path)
+detector.compute_rects(config.dino_config_path, config.dino_checkpoint_path)
