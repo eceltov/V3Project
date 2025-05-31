@@ -153,7 +153,7 @@ For each pair of annotation and perturbation factor, five different bounding box
 
 ![Grid Perturbations](./figures/heatmaps.png)
 
-The general trend of the graphs is that perturbation decreases the relative performance of grids with smaller overlaps more. This could be interpreted as grids with bigger overlaps being more rigid; more bounding boxes tend to fall into the correct segments.
+The general trend of the graphs is that perturbation decreases the relative performance of grids with smaller overlaps more. This could be interpreted as grids with bigger overlaps being more robust; more bounding boxes tend to fall into the correct segments.
 
 The takeaway from these graphs is that systems implementing grid search should consider using higher overlaps in case their users tend to draw bounding boxes with significant perturbation. An interesting approach would be to dynamically measure the perturbation for each user and employ a grid that best matches their needs on an individual basis.
 
