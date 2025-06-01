@@ -264,16 +264,24 @@ The evaluation functions are named `*get_file_results* and operate on annotation
 ## Installation
 
 It is recommended to install the packages and run the scripts from a virtual environment.
+All of the scripts were tested on Python3.11, although they might work for different versions as well.
 
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 python3 -m pip install -r requirements.txt
+mkdir models
 ```
+
+You then need to download the *ViT-SO400M-14-SigLIP-384* model checkpoint from [here](https://github.com/Visual-Computing/MCIP?tab=readme-ov-file#model-checkpoints) and place it in the *models* folder.
+
+The dynamic analysis requires the Grounding DINO package, which is installed directly from the Grounding DINO repository found [here](https://github.com/IDEA-Research/GroundingDINO).
+Make sure to follow all the installation instructions.
 
 The scripts require a folder with MVK frames and annotations that are not part of this repository.
 Please contact the maintainer for the data.
-The paths to these folders need to be configured in `config.json` under the `datasetPath` and `annotationsDir` keys.
+The paths to these folders can be configured in `config.json` under the `datasetPath` and `annotationsDir` keys.
+By default, the *MVK* and *annotations* folders are expected to be placed in the parent directory containing the cloned repository.
 
 ## Configuration
 
@@ -294,10 +302,10 @@ The rest of the configuration is mostly paths that do not need to be changed and
 
 The following scripts either create embeddings for the analysis, or produce a dataset from these embeddings.
 
-- `datasetCreator.py`: Creates CSV datasets inside the `results` folder (will be created if absent).
+- `datasetCreator.py`: Creates CSV datasets inside the `results` folder (will be created if absent) from the computed embeddings.
 Contains a function for each dataset type (annotation, static analysis, dynamic analysis, theoretical analysis).
 
-- `computeTheoreticalEmbeddings.py`: Creates derived embedding files from annotations. This is a very computationally intensive task; a single annotation file can take several hours to process. Because of this, it is intended to be run on multiple nodes. It takes two arguments: the 0-based serial number of the node and the total number of nodes running the script. Each node will be assigned a subset of annotations. The script guarantees that two nodes will not work on the same annotations, provided they have different serial numbers and the same total number of nodes in their launch parameters. This holds true even if the nodes start running at different times. We recommend using prime numbers for the total number of nodes and changing this number to a different prime with every batch to balance the workload (think of a "node" here more as a job submission rather than a physical machine).
+- `computeTheoreticalEmbeddings.py`: Creates embedding files from annotations. This is a very computationally intensive task; a single annotation file can take several hours to process. Because of this, it is intended to be run on multiple nodes. It takes two arguments: the 0-based serial number of the node and the total number of nodes running the script. Each node will be assigned a subset of annotations. The script guarantees that two nodes will not work on the same annotations, provided they have different serial numbers and the same total number of nodes in their launch parameters. This holds true even if the nodes start running at different times. We recommend using prime numbers for the total number of nodes and changing this number to a different prime with every batch to balance the workload (think of a "node" here more as a job submission rather than a physical machine).
 
 - `computeStaticEmbeddings.py`: Creates static grid embedding files.
 The function call inside the file can be used with different parameters.
@@ -323,8 +331,6 @@ Finally, the `graphs.ipynb` Jupyter Notebook ingests the produced CSV datasets t
 
 The scripts placed directly in the main repository folder can be run as-is.
 Make sure you run them from that folder so that the relative paths in `config.json` hold.
-
-Note that the `computeDetectionRects.py` script requires the Grounding DINO package, that is installed directly from the Grounding DINO repository found [here](https://github.com/IDEA-Research/GroundingDINO).
 
 # References
 [1] Stroh, Michael; Kloda, Vojtěch; Verner, Benjamin; et al. PraK Tool V3: Enhancing Video Item Search Using Localized Text and Texture Queries. In: Ide, Ichiro; Kompatsiaris, Ioannis; Xu, Changsheng; Yanai, Keiji; Chu, Wei-Ta; Nitta, Naoko; Riegler, Michael; Yamasaki, Toshihiko (eds.). MultiMedia Modeling. Singapore: Springer Nature Singapore, 2025, pp. 326–333. isbn 978-981-96-2074-6.

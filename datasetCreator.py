@@ -2,11 +2,11 @@ import lib.databaseGateway as db
 import lib.configurationProvider as config
 import pandas as pd
 from lib.resultAggregator import ResultAggregator
-import lib.optimalGridAnalysisTool as ogat
+import lib.theoreticalAnalysisTool as tat
 import lib.staticAnalysisTool as sat
 import lib.dynamicAnalysisTool as dat
-import numpy as np
 import random
+from pathlib import Path
 
 # seed the RNG for consistent pertubations
 random.seed(0)
@@ -39,6 +39,8 @@ def save_annotations():
   # remove duplicated rows (they may have different annotation_id)
   without_annotation_id = df.drop("annotation_id", axis=1)
   df = df.loc[without_annotation_id.astype(str).drop_duplicates().index]
+  # create results dir if absent
+  Path(config.annotation_csv_path).parent.mkdir(parents=True, exist_ok=True)
   df.to_csv(config.annotation_csv_path, index=False)
 
 def save_theoretical_results():
@@ -46,7 +48,7 @@ def save_theoretical_results():
   for embed_config in config.get_optimal_embed_configs():
     model, _, tokenizer = db.get_model(embed_config["model_year"])
     for file_id in range(len(filenames[embed_config["skippable"]])):
-      file_results = ogat.get_file_results(file_id, model, tokenizer, embed_config)
+      file_results = tat.get_file_results(file_id, model, tokenizer, embed_config)
       results.append_results(file_results)
       print(".", end="", flush=True)
   results.to_csv(config.optimal_csv_path)
@@ -83,4 +85,5 @@ def save_dynamic_grid_results():
   results.to_csv(config.dynamic_csv_path)
 
 if __name__ == "__main__":
-  save_dynamic_grid_results()
+  # use the various "save_..." functions to produce the datasets you want
+  save_annotations()
