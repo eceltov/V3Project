@@ -257,6 +257,10 @@ The project comprises the following components, which are also depicted in the d
 
 - **TheoreticalJobScheduler**: This class is employed by the theoretical preprocessing tool to schedule and compute embeddings. As theoretical embeddings require several months to compute, it was necessary to offload this computation to a GPU cluster. To prevent computation nodes from processing the same annotations, a scheduler was developed that assigns each node a unique collection of jobs. The scheduler is resilient to delayed node execution, meaning that even if a given node starts days later, no conflicts will arise. Furthermore, it does not necessitate communication between nodes to schedule jobs fairly; it relies on a trick that if the user schedules a different prime number of nodes each time, the jobs will be distributed evenly.
 
+- **Analysis Tools**: Although these modules differ in their content, they have the same underlying structure.
+They each define a function used by the preprocessing tools to compute embeddings, and a separate function that the dataset creation tool uses for evaluation.
+The evaluation functions are named `*get_file_results* and operate on annotation files and, notably, define what columns the datasets will contain.
+
 ## Installation
 
 It is recommended to install the packages and run the scripts from a virtual environment.
