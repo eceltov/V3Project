@@ -214,7 +214,7 @@ def mouse_release_callback(sender, app_data):
 
 # adds an annotation to the json file
 def save_annotation(short, long, frameIdx, rect):
-  filename = "annotations.json"
+  filename = "annotationsSkippable.json"
   # create file if it does not exist
   if not os.path.exists(filename):
     with open(filename, 'w') as file:
