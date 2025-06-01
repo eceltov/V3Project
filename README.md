@@ -320,10 +320,11 @@ The scripts inside the `annotators` folder are the annotation tools used for the
 
 The `lib` folder contains various function collections used by the previously mentioned scripts:
 
-- `processingTool.py`: Contains the main infrastructure functions for configuration loading, annotation retrieval and embedding file I/O.
+- `databaseGateway.py`: Provides an interface with the file database and provides models.
 - The various `analysisTools`: Contain the implementations for how the embeddings are created and datasets derived.
 - `boundaries.py`: Contains definitions for various grid segments used by the static grid and textual analysis.
 - `rectangles.py`: Contains several utility functions for rectangle manipulation, such as IoU computation and rectangle perturbation.
+- `groundingDinoDetector.py`: A modified Grounding DINO demo script that computes detection bounding boxes.
 
 Finally, the `graphs.ipynb` Jupyter Notebook ingests the produced CSV datasets to produce the various graphs found in this study.
 
