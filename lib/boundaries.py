@@ -126,6 +126,7 @@ def get_8_piece_overlap_boundaries(width, height):
     (centerpiece_shifted_x, centerpiece_shifted_y, centerpiece_x + seg_width, centerpiece_y + seg_height), # center right lower
   ]
 
+# given an image path and a boundary function, reads and segments the image into a list
 def get_image_sections(filename, get_boundaries):
   image = Image.open(filename)
   width, height = image.size

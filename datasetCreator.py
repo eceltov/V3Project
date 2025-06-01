@@ -82,4 +82,5 @@ def save_dynamic_grid_results():
       print(".", end="", flush=True)
   results.to_csv(config.dynamic_csv_path)
 
-save_dynamic_grid_results()
+if __name__ == "__main__":
+  save_dynamic_grid_results()

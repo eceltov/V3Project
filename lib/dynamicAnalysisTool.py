@@ -4,7 +4,7 @@ import lib.configurationProvider as config
 import lib.rankCalculations as rc
 import lib.boundaries as boundaries
 import lib.rectangles as rectangles
-import lib.optimalGridAnalysisTool as ogat
+import lib.theoreticalAnalysisTool as tat
 import torch.nn.functional as F
 
 def get_representing_rects(rects: list[list], kmeans_k: int, representing_rect_area: int) -> list[list]:
@@ -43,7 +43,7 @@ def get_dynamic_embeddings(frame_idx, rects: list[list], model, preprocess):
   embeds = []
   with torch.no_grad(), torch.amp.autocast(config.device):
     for bounding_box in rects:
-      frame_section = ogat.get_frame_section(filepath, bounding_box)
+      frame_section = tat.get_frame_section(filepath, bounding_box)
       preprocessed = preprocess(frame_section).unsqueeze(0).to(config.device)
       embeds.append(model.encode_image(preprocessed).to('cpu'))
 

@@ -1,8 +1,8 @@
 import lib.databaseGateway as db
 import lib.configurationProvider as config
-import lib.optimalGridAnalysisTool as ogat
+import lib.theoreticalAnalysisTool as tat
 
-class OptimalGridJobScheduler:
+class TheoreticalJobScheduler:
   def __init__(self, annotations_per_config, job_id, job_count):
     # how many annotations to process from the file for each configuration
     self.annotations_per_config = annotations_per_config
@@ -123,4 +123,4 @@ class OptimalGridJobScheduler:
   # based on how many concurrent jobs are running, select unique tasks based on job_id
   def do_tasks(self):
     for task in self.remaining_tasks_flattened:
-      ogat.process_annotation(task["file_id"], task["annotation_id"], task["embed_config"])
+      tat.process_annotation(task["file_id"], task["annotation_id"], task["embed_config"])

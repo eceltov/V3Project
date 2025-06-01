@@ -223,7 +223,39 @@ Finally, this study laid the groundwork for two papers currently being submitted
 
 # Project Structure and Usage
 
+This section will detail the design of the software, go over the installation and configuration process, and describe how it is used.
+
+
+## Architecture and Design
+
 This project is structured as a collection of scripts, reflecting the diverse nature of its computations. The general workflow is divided into a long precomputation phase, where necessary embeddings and detection rectangles are generated, and a shorter evaluation phase, which produces CSV datasets for analysis.
+
+The project comprises the following components, which are also depicted in the diagram below:
+
+- **Annotation GUI**: These are the two annotators utilized by users to produce annotations. Aside from the MVK dataset, annotations are the sole source of raw data ingested by the system; all other data is derived from the dataset and annotations.
+
+- **Configuration Provider**: This component parses the system configuration and provides it to other components. Notably, the configuration dictates which embeddings and evaluations will be computed and defines the database's structural layout.
+
+- **Database**: A file storage system organized into folders containing annotations, MVK frames, computed embeddings, detections, and evaluation results. Given that it exclusively contains files that do not necessitate sophisticated querying, it was determined that BLOB or JSON databases would merely complicate the system without adding substantial value.
+
+- **Database Gateway**: An interface component for the database. It also provides the two CLIP models, thereby abstracting low-level details from the analysis tools.
+
+- **Analysis Tools**: A collection of libraries implementing methods for computing embeddings and evaluating results. The primary libraries include the *static*, *dynamic*, and *theoretical* analysis tools for distinct localization methods, and the *GroundingDINO detector*, which acts as an interface for the GroundingDINO package.
+
+- **Preprocessing Tools**: These are simple scripts that typically invoke a single method from the analysis tools to generate detections and embeddings. Historically, these scripts were executed in various environments, such as standard PC setups or GPU computation clusters, and are thus designed for ease of modification.
+
+- **Dataset Creation Tool**: This tool invokes the evaluation methods implemented by the analysis tools to produce CSV datasets, which are subsequently processed and used to generate graphs.
+
+![System Architecture](./figures/architecture.png)
+
+
+### Important Modules and Classes:
+
+- **rectangles**: This module contains functions for manipulating rectangles, typically annotation or detection bounding boxes. It expects rectangles in the *[x1, y1, x2, y2]* format and can perform operations such as computing IoU with another rectangle, perturbing the rectangle, and confining the rectangle to a specific area (useful for perturbed rectangles that shift outside the frame).
+
+- **boundaries**: This module defines grid segment boundaries as a list of rectangles; most notably, it defines the 5- and 9-grids with arbitrary overlaps. It also contains a function that can partition images with a given boundary function, which is utilized by the static analysis tool.
+
+- **TheoreticalJobScheduler**: This class is employed by the theoretical preprocessing tool to schedule and compute embeddings. As theoretical embeddings require several months to compute, it was necessary to offload this computation to a GPU cluster, where parallel processing is feasible. To prevent computation nodes from processing the same annotations, a scheduler was developed that assigns each node a unique collection of jobs. The scheduler is resilient to delayed node execution, meaning that even if a given node starts days later, no conflicts will arise. Furthermore, it does not necessitate communication between nodes to schedule jobs fairly; it relies on the principle that if the user schedules a different prime number of nodes each time, the jobs will be distributed evenly.
 
 ## Installation
 
