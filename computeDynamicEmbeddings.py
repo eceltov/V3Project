@@ -5,6 +5,7 @@ print(f"Job started at: {datetime.datetime.now()}")
 import lib.dynamicAnalysisTool as dat
 import lib.databaseGateway as db
 
+# read detections provided by GroundingDINO
 rects = db.read_detection_boxes()
 
 embed_config = {

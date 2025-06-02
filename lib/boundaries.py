@@ -4,6 +4,7 @@ import math
 # This file contains functions that return an array of boundary rectangles.
 # Given a width, height, and possibly an overlap parameter, each array element is a (x1,y1,x2,y2) tuple representing
 # the segmentation kind.
+# The overlap represents the fraction of the frame dimensions added to each segment.
 
 def get_whole_boundaries(width, height):
   return [

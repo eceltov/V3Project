@@ -18,6 +18,7 @@ filenames = {
   False: not_skippable_filenames,
 }
 
+# creates a CSV from raw annotations, also filters out duplicates
 def save_annotations():
   refined_annotations = []
   for skippable, annotation_filenames in filenames.items():

@@ -71,6 +71,7 @@ def save_all_dynamic_embeddings(rects: list[list[list]], embed_config):
 
   db.write_dynamic_embeddings(embed_config["model_year"], embed_list)
 
+# appends a special segment covering the whole frame to the rects and embeds
 def preprocess_detections(detection_rects: list[list[list]], detection_embeds, embed_config):
   whole_embeds = db.read_static_embeddings(embed_config["model_year"], "whole")[0]
   whole_frame_rect = [0, 0, config.frame_width, config.frame_height]

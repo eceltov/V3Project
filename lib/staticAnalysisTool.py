@@ -33,6 +33,7 @@ def extract_embeddings(model_year, get_boundaries_callback):
 
   return concat_sections
 
+# given a grid kind, returns the callback that produces the segment rectangles
 def kind_to_boundaries_callback(kind):
   tokens = kind.split("_")
   if tokens[0] == "centerpiece":
@@ -97,6 +98,7 @@ def get_file_results(file_id, model, tokenizer, embed_config):
 
   return result_list
 
+# suffixes used in the textual analysis
 suffixes = {
   "short": [
     " in the upper left",

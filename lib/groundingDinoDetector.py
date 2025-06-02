@@ -149,7 +149,6 @@ def compute_rects(config_file, checkpoint_path):
             model, image, classes, box_threshold, text_threshold
         )
 
-        # visualize pred
         size = image_pil.size
         pred_dict = {
             "boxes": boxes_filt,
