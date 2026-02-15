@@ -52,6 +52,38 @@ def get_filename_from_file_id(file_id, skippable):
   annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)
   return annotation_filenames[file_id]
 
+def get_recall_annotation_filenames_and_dir_path():
+  annotation_filenames = config.recall_annotations_filenames
+  annotations_dir_path = config.recall_annotations_dir
+  return annotation_filenames, annotations_dir_path
+
+def get_recall_annotations():
+  annotation_filenames, annotations_dir_path = get_recall_annotation_filenames_and_dir_path()
+  annotation_list = []
+  for filename in annotation_filenames:
+    file_path = os.path.join(annotations_dir_path, filename)
+    file = open(file_path, "r")
+    content = json.loads(file.read())
+
+    tokens = filename.split("_")
+    bucket = tokens[0]
+    annotation_order = tokens[1]
+    bucket_order = tokens[2]
+    id = tokens[3]
+    annotation_list.append({
+      "id": id,
+      "bucket": bucket,
+      "annotation_order": annotation_order,
+      "bucket_order": bucket_order,
+      "annotation": content
+    })
+  return annotation_list
+
+def get_frame_idx_from_recall_round(recall_round):
+  _, _, _, frame_path_to_frame_idx_map = get_MVK_metadata()
+  frame = recall_round["roundId"] # in "folder/frame" format (with extension)
+  frame_path = os.path.join(config.dataset_path, frame)
+  return frame_path_to_frame_idx_map[frame_path]
 
 def get_2025_model():
   import open_clip

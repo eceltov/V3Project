@@ -98,6 +98,51 @@ def get_file_results(file_id, model, tokenizer, embed_config):
 
   return result_list
 
+def get_recall_annotation_results(annotation, model, tokenizer, embed_config):
+  embeds = db.read_static_embeddings(embed_config["model_year"], embed_config["kind"])
+  # load segments to gpu
+  embeds = [segment_embeds.to(config.device) for segment_embeds in embeds]
+  segment_rects = kind_to_boundaries_callback(embed_config["kind"])(config.frame_width, config.frame_height)
+
+  result_list = []
+  for round_id in range(len(annotation["annotation"]["rounds"])):
+    round = annotation["annotation"]["rounds"][round_id]
+    
+    frame_idx = db.get_frame_idx_from_recall_round(round)
+    initial_rect = round["initialRect"]
+    final_rect = round["finalRect"]
+    desc_global = round["globalDesc"]
+    desc_object = round["objectDesc"]
+
+    for rect_type in ["initial_rect", "final_rect"]:
+      if rect_type == "initial_rect":
+        frame_rect = initial_rect
+      elif rect_type == "final_rect":
+        frame_rect = final_rect
+
+      segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
+
+      rank_global = rc.get_frame_rank(desc_global, frame_idx, embeds[segment_idx], model, tokenizer)
+      rank_object = rc.get_frame_rank(desc_object, frame_idx, embeds[segment_idx], model, tokenizer)
+      result_list.append({
+        "author": annotation["id"],
+        "annotation_id": round_id,
+        "bucket": annotation["bucket"],
+        "annotation_order": round["annotationOrder"],
+        "bucket_order": round["bucketOrder"],
+        "rect_type": rect_type,
+        "kind": embed_config["kind"],
+        "model_year": embed_config["model_year"],
+        "frame_idx": frame_idx,
+        "rank_global": rank_global,
+        "rank_object": rank_object,
+        "IoU": IoU,
+      })
+
+    print("#", end="", flush=True)
+
+  return result_list
+
 # suffixes used in the textual analysis
 suffixes = {
   "short": [

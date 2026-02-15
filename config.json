@@ -1,10 +1,14 @@
 {
-  "datasetPath": "../MVK",
+  "datasetPath": "../journal/MVK",
   "annotations": {
-    "annotationsDir": "../annotations",
+    "annotationsDir": "./annotations",
     "skippableDir": "skippable",
     "notSkippableDir": "notSkippable",
     "csvPath": "./results/annotations.csv"
+  },
+  "recallAnnotations": {
+    "annotationsDir": "../CollectedData",
+    "csvPath": "./results/recallAnnotations.csv"
   },
   "device": "cuda",
   "derivedDatasetEmbeddings": {
