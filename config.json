@@ -34,6 +34,7 @@
   "staticEmbeddings": {
     "mainDir": "./staticEmbeddings",
     "csvPath": "./results/staticResults.csv",
+    "recallCsvPath": "./results/recallStaticResults.csv",
     "pertubationsPerAnnotation": 5,
     "embedConfigs": [
       {
