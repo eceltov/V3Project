@@ -4,6 +4,7 @@ import math
 # This file contains functions that return an array of boundary rectangles.
 # Given a width, height, and possibly an overlap parameter, each array element is a (x1,y1,x2,y2) tuple representing
 # the segmentation kind.
+# The overlap represents the fraction of the frame dimensions added to each segment.
 
 def get_whole_boundaries(width, height):
   return [
@@ -126,6 +127,7 @@ def get_8_piece_overlap_boundaries(width, height):
     (centerpiece_shifted_x, centerpiece_shifted_y, centerpiece_x + seg_width, centerpiece_y + seg_height), # center right lower
   ]
 
+# given an image path and a boundary function, reads and segments the image into a list
 def get_image_sections(filename, get_boundaries):
   image = Image.open(filename)
   width, height = image.size

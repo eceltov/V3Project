@@ -1,7 +1,8 @@
-import lib.processingTool as pt
-import lib.optimalGridAnalysisTool as ogat
+import lib.databaseGateway as db
+import lib.configurationProvider as config
+import lib.theoreticalAnalysisTool as tat
 
-class OptimalGridJobScheduler:
+class TheoreticalJobScheduler:
   def __init__(self, annotations_per_config, job_id, job_count):
     # how many annotations to process from the file for each configuration
     self.annotations_per_config = annotations_per_config
@@ -23,13 +24,13 @@ class OptimalGridJobScheduler:
 
   # init the number of annotation files
   def __init_file_counts(self):
-    annotation_filenames_skippable, _ = pt.get_annotation_filenames_and_dir_path(True)
-    annotation_filenames_not_skippable, _ = pt.get_annotation_filenames_and_dir_path(False)
+    annotation_filenames_skippable, _ = db.get_annotation_filenames_and_dir_path(True)
+    annotation_filenames_not_skippable, _ = db.get_annotation_filenames_and_dir_path(False)
     self.annotation_file_counts[True] = len(annotation_filenames_skippable)
     self.annotation_file_counts[False] = len(annotation_filenames_not_skippable)
 
   def __init_tasks(self):
-    for embed_config in pt.get_optimal_embed_configs():
+    for embed_config in config.get_optimal_embed_configs():
       self.__append_tasks(embed_config)
 
   # appends the remaining_tasks and all_tasks dictionaries with tasks matching the configuration
@@ -57,7 +58,7 @@ class OptimalGridJobScheduler:
         # only append missing tasks
         if task_dict == self.all_remaining_tasks:
           missing_annotations_list = file_id_dict[file_id]
-          completed_ids = pt.get_completed_annotation_ids(file_id, embed_config)
+          completed_ids = db.get_completed_annotation_ids(file_id, embed_config)
           for annotation_id in range(self.annotations_per_config):
             if annotation_id not in completed_ids:
               missing_annotations_list.append(annotation_id)
@@ -122,4 +123,4 @@ class OptimalGridJobScheduler:
   # based on how many concurrent jobs are running, select unique tasks based on job_id
   def do_tasks(self):
     for task in self.remaining_tasks_flattened:
-      ogat.process_annotation(task["file_id"], task["annotation_id"], task["embed_config"])
+      tat.process_annotation(task["file_id"], task["annotation_id"], task["embed_config"])

@@ -1,6 +1,6 @@
 import sys
 import datetime
-from lib.optimalGridJobScheduler import OptimalGridJobScheduler as Scheduler
+from lib.theoreticalJobScheduler import TheoreticalJobScheduler as Scheduler
 
 # how many annotations should be processed from a single annotation file
 annotations_per_config = 20

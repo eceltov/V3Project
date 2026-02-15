@@ -14,7 +14,7 @@ from groundingdino.util.slconfig import SLConfig
 from groundingdino.util.utils import clean_state_dict, get_phrases_from_posmap
 from groundingdino.util.vl_utils import create_positive_map_from_span
 
-import lib.processingTool as pt
+import lib.databaseGateway as db
 
 def get_boxes(tgt):
     H, W = tgt["size"]
@@ -127,7 +127,7 @@ def compute_rects(config_file, checkpoint_path):
     box_threshold = 0.3
     text_threshold = 0.25
 
-    filepaths, _, _, _ = pt.get_MVK_metadata()
+    filepaths, _, _, _ = db.get_MVK_metadata()
 
     # load model
     model = load_model(config_file, checkpoint_path)
@@ -149,7 +149,6 @@ def compute_rects(config_file, checkpoint_path):
             model, image, classes, box_threshold, text_threshold
         )
 
-        # visualize pred
         size = image_pil.size
         pred_dict = {
             "boxes": boxes_filt,
@@ -162,4 +161,4 @@ def compute_rects(config_file, checkpoint_path):
         if i % 100 == 0:
             print(i, flush=True)
 
-    pt.write_detection_boxes(detection_boxes)
+    db.write_detection_boxes(detection_boxes)

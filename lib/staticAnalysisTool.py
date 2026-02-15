@@ -1,5 +1,6 @@
 import torch
-import lib.processingTool as pt
+import lib.databaseGateway as db
+import lib.configurationProvider as config
 import lib.rankCalculations as rc
 import lib.boundaries as boundaries
 import lib.rectangles as rectangles
@@ -8,14 +9,14 @@ import lib.rectangles as rectangles
 def extract_embeddings(model_year, get_boundaries_callback):
   import torch
 
-  model, preprocess, _ = pt.get_model(model_year)
-  filenames, _, _, _ = pt.get_MVK_metadata()
+  model, preprocess, _ = db.get_model(model_year)
+  filenames, _, _, _ = db.get_MVK_metadata()
 
   # the callback returns an array of length equal to the section count
   section_count = len(get_boundaries_callback(100, 100))
   section_embeds = [[] for i in range(section_count)]
 
-  with torch.no_grad(), torch.amp.autocast(pt.device):
+  with torch.no_grad(), torch.amp.autocast(config.device):
     for i in range(len(filenames)):
       sections = boundaries.get_image_sections(filenames[i], get_boundaries_callback)
 
@@ -23,7 +24,7 @@ def extract_embeddings(model_year, get_boundaries_callback):
         print("processed images:", i, flush=True)
 
       for section_idx in range(section_count):
-        preprocessed = preprocess(sections[section_idx]).unsqueeze(0).to(pt.device)
+        preprocessed = preprocess(sections[section_idx]).unsqueeze(0).to(config.device)
         section_embeds[section_idx].append(model.encode_image(preprocessed).to("cpu"))
 
   concat_sections = []
@@ -32,6 +33,7 @@ def extract_embeddings(model_year, get_boundaries_callback):
 
   return concat_sections
 
+# given a grid kind, returns the callback that produces the segment rectangles
 def kind_to_boundaries_callback(kind):
   tokens = kind.split("_")
   if tokens[0] == "centerpiece":
@@ -46,14 +48,14 @@ def save_embeddings(model_year, kind):
   # boundaries used by PraK
   get_boundaries_callback = kind_to_boundaries_callback(kind)
   embeddings = extract_embeddings(model_year, get_boundaries_callback)
-  pt.write_static_embeddings(model_year, kind, embeddings)
+  db.write_static_embeddings(model_year, kind, embeddings)
 
 def get_file_results(file_id, model, tokenizer, embed_config):
-  annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
-  embeds = pt.read_static_embeddings(embed_config["model_year"], embed_config["kind"])
+  annotations = db.get_file_annotations(file_id, embed_config["skippable"])
+  embeds = db.read_static_embeddings(embed_config["model_year"], embed_config["kind"])
   # load segments to gpu
-  embeds = [segment_embeds.to(pt.device) for segment_embeds in embeds]
-  segment_rects = kind_to_boundaries_callback(embed_config["kind"])(pt.frame_width, pt.frame_height)
+  embeds = [segment_embeds.to(config.device) for segment_embeds in embeds]
+  segment_rects = kind_to_boundaries_callback(embed_config["kind"])(config.frame_width, config.frame_height)
 
   result_list = []
   for annotation in annotations:
@@ -65,17 +67,17 @@ def get_file_results(file_id, model, tokenizer, embed_config):
     desc_long = annotation["desc_long"]
     pertubation = embed_config["pertubation_factor"]
 
-    for perturbation_id in range(pt.pertubations_per_annotation):
+    for perturbation_id in range(config.pertubations_per_annotation):
       # pertube the annotation rectangle randomly (simulation imperfect user input rect)
       if pertubation > 0:
-        frame_rect = rectangles.pertube_rect(frame_rect, pertubation, pt.frame_width, pt.frame_height)
+        frame_rect = rectangles.pertube_rect(frame_rect, pertubation, config.frame_width, config.frame_height)
 
       segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
 
       rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[segment_idx], model, tokenizer)
       rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[segment_idx], model, tokenizer)
       result_list.append({
-        "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
+        "author": db.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
         "skippable": embed_config["skippable"],
         "annotation_id": annotation_id,
         "perturbation_id": perturbation_id,
@@ -96,6 +98,52 @@ def get_file_results(file_id, model, tokenizer, embed_config):
 
   return result_list
 
+def get_recall_annotation_results(annotation, model, tokenizer, embed_config):
+  embeds = db.read_static_embeddings(embed_config["model_year"], embed_config["kind"])
+  # load segments to gpu
+  embeds = [segment_embeds.to(config.device) for segment_embeds in embeds]
+  segment_rects = kind_to_boundaries_callback(embed_config["kind"])(config.frame_width, config.frame_height)
+
+  result_list = []
+  for round_id in range(len(annotation["annotation"]["rounds"])):
+    round = annotation["annotation"]["rounds"][round_id]
+    
+    frame_idx = db.get_frame_idx_from_recall_round(round)
+    initial_rect = round["initialRect"]
+    final_rect = round["finalRect"]
+    desc_global = round["globalDesc"]
+    desc_object = round["objectDesc"]
+
+    for rect_type in ["initial_rect", "final_rect"]:
+      if rect_type == "initial_rect":
+        frame_rect = initial_rect
+      elif rect_type == "final_rect":
+        frame_rect = final_rect
+
+      segment_idx, IoU = rectangles.get_best_IoU_segment_idx(frame_rect, segment_rects)
+
+      rank_global = rc.get_frame_rank(desc_global, frame_idx, embeds[segment_idx], model, tokenizer)
+      rank_object = rc.get_frame_rank(desc_object, frame_idx, embeds[segment_idx], model, tokenizer)
+      result_list.append({
+        "author": annotation["id"],
+        "annotation_id": round_id,
+        "bucket": annotation["bucket"],
+        "annotation_order": round["annotationOrder"],
+        "bucket_order": round["bucketOrder"],
+        "rect_type": rect_type,
+        "kind": embed_config["kind"],
+        "model_year": embed_config["model_year"],
+        "frame_idx": frame_idx,
+        "rank_global": rank_global,
+        "rank_object": rank_object,
+        "IoU": IoU,
+      })
+
+    print("#", end="", flush=True)
+
+  return result_list
+
+# suffixes used in the textual analysis
 suffixes = {
   "short": [
     " in the upper left",
@@ -117,11 +165,11 @@ def get_centerpiece_overlap_textual_suffix(segment_idx, suffix_kind):
   return suffixes[suffix_kind][segment_idx]
 
 def get_file_results_textual(file_id, model, tokenizer, embed_config, suffix_kind):
-  annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
-  embeds = pt.read_static_embeddings(embed_config["model_year"], "whole")
+  annotations = db.get_file_annotations(file_id, embed_config["skippable"])
+  embeds = db.read_static_embeddings(embed_config["model_year"], "whole")
   # load segments to gpu
-  embeds = [segment_embeds.to(pt.device) for segment_embeds in embeds]
-  segment_rects = kind_to_boundaries_callback("centerpiece_10")(pt.frame_width, pt.frame_height)
+  embeds = [segment_embeds.to(config.device) for segment_embeds in embeds]
+  segment_rects = kind_to_boundaries_callback("centerpiece_10")(config.frame_width, config.frame_height)
 
   result_list = []
   for annotation in annotations:
@@ -137,7 +185,7 @@ def get_file_results_textual(file_id, model, tokenizer, embed_config, suffix_kin
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds[0], model, tokenizer)
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds[0], model, tokenizer)
     result_list.append({
-      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
+      "author": config.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
       "skippable": embed_config["skippable"],
       "annotation_id": annotation_id,
       "perturbation_id": 0,

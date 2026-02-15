@@ -1,10 +1,14 @@
 {
-  "datasetPath": "../MVK",
+  "datasetPath": "../journal/MVK",
   "annotations": {
-    "annotationsDir": "../annotations",
+    "annotationsDir": "./annotations",
     "skippableDir": "skippable",
     "notSkippableDir": "notSkippable",
     "csvPath": "./results/annotations.csv"
+  },
+  "recallAnnotations": {
+    "annotationsDir": "../CollectedData",
+    "csvPath": "./results/recallAnnotations.csv"
   },
   "device": "cuda",
   "derivedDatasetEmbeddings": {
@@ -30,6 +34,7 @@
   "staticEmbeddings": {
     "mainDir": "./staticEmbeddings",
     "csvPath": "./results/staticResults.csv",
+    "recallCsvPath": "./results/recallStaticResults.csv",
     "pertubationsPerAnnotation": 5,
     "embedConfigs": [
       {
@@ -69,8 +74,14 @@
     "mainDir": "./dynamicEmbeddings",
     "csvPath": "./results/dynamicResults.csv",
     "detectionBoxesPath": "./detectionBoxes",
-    "dinoCheckpointPath": "/mnt/c/school/videa/dynamicAnnotation/GroundingDINO/weights/groundingdino_swint_ogc.pth",
-    "dinoConfigPath": "/mnt/c/school/videa/dynamicAnnotation/GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py"
+    "dinoCheckpointPath": "../GroundingDINO/weights/groundingdino_swint_ogc.pth",
+    "dinoConfigPath": "../GroundingDINO/groundingdino/config/GroundingDINO_SwinT_OGC.py",
+    "embedConfigs": [
+      {
+        "skippable": [true, false],
+        "model_year": ["2025"]
+      }
+    ]
   },
   "frameWidth": 682,
   "frameHeight": 384,

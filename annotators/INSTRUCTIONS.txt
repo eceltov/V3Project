@@ -1,0 +1,33 @@
+Installation:
+  pip install -r requirements.txt
+
+Annotation:
+  To annotate an object, draw a rectangle around it using your cursor and fill out
+  the short and long descriptions (two text boxes at the top of the screen).
+  The text hints show approximately how long the descriptions should be.
+  To submit the annotation, press the Save Annotation button or Return on your keyboard.
+  To focus the textboxes, you can click on them or press Tab.
+
+  Do not draw rectangles that take up more than 30 % of the picture.
+  You can draw and submit multiple annotations per picture.
+  Do not draw rectangles with a significant intersection on the same picture,
+  small intersections are fine.
+
+  There are two annotation scripts.
+  You can exit them at any time with ALT+F4 (Windows) or by terminating the process
+  on the command line (CTRL+C).
+  The annotations are saved in JSON files.
+
+  First, please run the annotatorSkippable.py script and annotate at least 20 objects (there is a counter).
+  You can annotate any object you find interesting.
+  If you cannot find anything to annotate on a picture, you can skip to another
+  one by pressing the Next Frame button or F12 on your keyboard.
+  It is fine to skip more pictures in a row.
+
+  Finally, please run the annotatorNoSkips.py script and annotate exactly 20 objects.
+  The only difference here is that you cannot skip pictures unless you have annotated something
+  on them first.
+  It is very likely that you will find pictures with nothing interesting on them (rocks, murky water,
+  sand), in that case select the most interesting/distinguishable part of the picture to annotate
+  (a single rock, light in dark water, dune in the sand).
+  You can still annotate multiple objects per picture.

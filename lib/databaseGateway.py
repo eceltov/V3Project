@@ -3,41 +3,15 @@ import os
 import pickle
 from pathlib import Path
 import lib.rectangles as rectangles
-
-def get_config():
-  f = open("./config.json", "r")
-  return json.loads(f.read())
-
-config = get_config()
-device = config["device"]
-dataset_path = config["datasetPath"]
-annotations_config = config["annotations"]
-annotations_dir_skippable = os.path.join(annotations_config["annotationsDir"], annotations_config["skippableDir"])
-annotations_dir_not_skippable = os.path.join(annotations_config["annotationsDir"], annotations_config["notSkippableDir"])
-annotation_filenames_skippable = sorted(os.listdir(annotations_dir_skippable))
-annotation_filenames_not_skippable = sorted(os.listdir(annotations_dir_not_skippable))
-derived_dataset_embeddings_config = config["derivedDatasetEmbeddings"]
-static_embeddings_config = config["staticEmbeddings"]
-dynamic_embeddings_config = config["dynamicEmbeddings"]
-frame_width = config["frameWidth"]
-frame_height = config["frameHeight"]
-box_enlargement_step = config["boxEnlargementStep"]
-optimal_csv_path = derived_dataset_embeddings_config["csvPath"]
-static_csv_path = static_embeddings_config["csvPath"]
-dynamic_csv_path = dynamic_embeddings_config["csvPath"]
-detection_boxes_path = dynamic_embeddings_config["detectionBoxesPath"]
-dino_checkpoint_path = dynamic_embeddings_config["dinoCheckpointPath"]
-dino_config_path = dynamic_embeddings_config["dinoConfigPath"]
-annotation_csv_path = annotations_config["csvPath"]
-pertubations_per_annotation = static_embeddings_config["pertubationsPerAnnotation"]
+import lib.configurationProvider as config
 
 def get_annotation_filenames_and_dir_path(skippable):
   if skippable:
-    annotation_filenames = annotation_filenames_skippable
-    annotations_dir_path = annotations_dir_skippable
+    annotation_filenames = config.annotation_filenames_skippable
+    annotations_dir_path = config.annotations_dir_skippable
   else:
-    annotation_filenames = annotation_filenames_not_skippable
-    annotations_dir_path = annotations_dir_not_skippable
+    annotation_filenames = config.annotation_filenames_not_skippable
+    annotations_dir_path = config.annotations_dir_not_skippable
   return annotation_filenames, annotations_dir_path
 
 def annotation_file_exists(file_id, skippable):
@@ -78,6 +52,38 @@ def get_filename_from_file_id(file_id, skippable):
   annotation_filenames, annotations_dir_path = get_annotation_filenames_and_dir_path(skippable)
   return annotation_filenames[file_id]
 
+def get_recall_annotation_filenames_and_dir_path():
+  annotation_filenames = config.recall_annotations_filenames
+  annotations_dir_path = config.recall_annotations_dir
+  return annotation_filenames, annotations_dir_path
+
+def get_recall_annotations():
+  annotation_filenames, annotations_dir_path = get_recall_annotation_filenames_and_dir_path()
+  annotation_list = []
+  for filename in annotation_filenames:
+    file_path = os.path.join(annotations_dir_path, filename)
+    file = open(file_path, "r")
+    content = json.loads(file.read())
+
+    tokens = filename.split("_")
+    bucket = tokens[0]
+    annotation_order = tokens[1]
+    bucket_order = tokens[2]
+    id = tokens[3]
+    annotation_list.append({
+      "id": id,
+      "bucket": bucket,
+      "annotation_order": annotation_order,
+      "bucket_order": bucket_order,
+      "annotation": content
+    })
+  return annotation_list
+
+def get_frame_idx_from_recall_round(recall_round):
+  _, _, _, frame_path_to_frame_idx_map = get_MVK_metadata()
+  frame = recall_round["roundId"] # in "folder/frame" format (with extension)
+  frame_path = os.path.join(config.dataset_path, frame)
+  return frame_path_to_frame_idx_map[frame_path]
 
 def get_2025_model():
   import open_clip
@@ -86,7 +92,7 @@ def get_2025_model():
   model, _, preprocess = open_clip.create_model_and_transforms(
     'ViT-SO400M-14-SigLIP-384',
     pretrained='webli',
-    device=device)
+    device=config.device)
   checkpoint_path = 'models/MCIP-ViT-SO400M-14-SigLIP-384.pth'
   mcip_state_dict = torch.load(checkpoint_path)
   model.load_state_dict(mcip_state_dict, strict=True)
@@ -99,7 +105,7 @@ def get_2024_model():
 
   model, _, preprocess = open_clip.create_model_and_transforms(
     'hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K',
-    device=device)
+    device=config.device)
   tokenizer = open_clip.get_tokenizer('hf-hub:laion/CLIP-ViT-H-14-laion2B-s32B-b79K')
 
   return model, preprocess, tokenizer
@@ -130,8 +136,8 @@ def get_MVK_metadata():
   frame_path_to_frame_idx_map = {}
 
   idx = 0
-  for dirname in sorted(os.listdir(dataset_path)):
-    dirpath = os.path.join(dataset_path, dirname)
+  for dirname in sorted(os.listdir(config.dataset_path)):
+    dirpath = os.path.join(config.dataset_path, dirname)
     video_indices = []
     for fn in sorted(os.listdir(dirpath)):
       filename = os.path.join(dirpath, fn)
@@ -153,11 +159,11 @@ def get_annotation_rect(annotation, embed_config):
   # swap coords so that the first point has lower coords than the second
   x1, y1, x2, y2 = rectangles.normalize(annotation["rect"])
 
-  enlargement = box_enlargement_step * embed_config["box_enlargements"]
+  enlargement = config.box_enlargement_step * embed_config["box_enlargements"]
   x1 = max(0, x1 - enlargement)
   y1 = max(0, y1 - enlargement)
-  x2 = min(frame_width, x2 + enlargement)
-  y2 = min(frame_height, y2 + enlargement)
+  x2 = min(config.frame_width, x2 + enlargement)
+  y2 = min(config.frame_height, y2 + enlargement)
   return [x1, y1, x2, y2]
 
 def write_pickle_file(file_path, data):
@@ -169,19 +175,19 @@ def read_pickle_file(file_path):
     return pickle.load(handle)
 
 def get_derived_dataset_embeddings_dir(embed_config):
-  path = derived_dataset_embeddings_config["mainDir"]
+  path = config.derived_dataset_embeddings_config["mainDir"]
   # whether the annotator could skip frames
   if embed_config["skippable"]:
-    path = os.path.join(path, derived_dataset_embeddings_config["skippableDir"])
+    path = os.path.join(path, config.derived_dataset_embeddings_config["skippableDir"])
   else:
-    path = os.path.join(path, derived_dataset_embeddings_config["notSkippableDir"])
+    path = os.path.join(path, config.derived_dataset_embeddings_config["notSkippableDir"])
 
   # whether the bounding boxes are the original ones drawn by the annotator
   box_enlargements = embed_config["box_enlargements"]
   if box_enlargements == 0:
-    path = os.path.join(path, derived_dataset_embeddings_config["originalBoundingBoxDir"])
+    path = os.path.join(path, config.derived_dataset_embeddings_config["originalBoundingBoxDir"])
   else:
-    folder_name = derived_dataset_embeddings_config["enlargedBoundingBoxDir"] + str(box_enlargements)
+    folder_name = config.derived_dataset_embeddings_config["enlargedBoundingBoxDir"] + str(box_enlargements)
     path = os.path.join(path, folder_name)
     
   # add model year
@@ -214,33 +220,33 @@ def read_derived_dataset_embeddings(file_id, annotation_id, embed_config):
 def write_static_embeddings(model_year, kind, data):
   data_filename = get_static_embeddings_filename(model_year, kind)
   # create folder if it does not exist
-  static_embeddings_dir = static_embeddings_config["mainDir"]
+  static_embeddings_dir = config.static_embeddings_config["mainDir"]
   Path(static_embeddings_dir).mkdir(parents=True, exist_ok=True)
   write_pickle_file(os.path.join(static_embeddings_dir, data_filename), data)
 
 def read_static_embeddings(model_year, kind):
   data_filename = get_static_embeddings_filename(model_year, kind)
-  static_embeddings_dir = static_embeddings_config["mainDir"]
+  static_embeddings_dir = config.static_embeddings_config["mainDir"]
   return read_pickle_file(os.path.join(static_embeddings_dir, data_filename))
 
 def write_detection_boxes(data):
-  data_filename = detection_boxes_path
+  data_filename = config.detection_boxes_path
   write_pickle_file(data_filename, data)
 
 def read_detection_boxes():
-  data_filename = detection_boxes_path
+  data_filename = config.detection_boxes_path
   return read_pickle_file(data_filename)
 
 def write_dynamic_embeddings(model_year, data):
   data_filename = get_dynamic_embeddings_filename(model_year)
   # create folder if it does not exist
-  dynamic_embeddings_dir = dynamic_embeddings_config["mainDir"]
+  dynamic_embeddings_dir = config.dynamic_embeddings_config["mainDir"]
   Path(dynamic_embeddings_dir).mkdir(parents=True, exist_ok=True)
   write_pickle_file(os.path.join(dynamic_embeddings_dir, data_filename), data)
 
 def read_dynamic_embeddings(model_year):
   data_filename = get_dynamic_embeddings_filename(model_year)
-  dynamic_embeddings_dir = dynamic_embeddings_config["mainDir"]
+  dynamic_embeddings_dir = config.dynamic_embeddings_config["mainDir"]
   return read_pickle_file(os.path.join(dynamic_embeddings_dir, data_filename))
 
 # returns the id of the last annotation for the given annotations file
@@ -299,34 +305,3 @@ def make_dict_path(dict: dict, *keys: str):
   for key in keys:
     dict = dict.setdefault(key, {})
   return dict
-
-# returns a list of all evaluated embedding configurations
-def get_optimal_embed_configs():
-  embed_configs = []
-  for raw_config in derived_dataset_embeddings_config["embedConfigs"]:
-    for box_enlargements in raw_config["box_enlargements"]:
-      for skippable in raw_config["skippable"]:
-        for model_year in raw_config["model_year"]:
-            embed_configs.append({
-              "skippable": skippable,
-              "box_enlargements": box_enlargements,
-              "model_year": model_year,
-            })
-
-  return embed_configs
-
-def get_static_embed_configs():
-  embed_configs = []
-  for raw_config in static_embeddings_config["embedConfigs"]:
-    for model_year in raw_config["model_year"]:
-      for skippable in raw_config["skippable"]:
-        for pertubation_factor in raw_config["pertubation_factor"]:
-          for kind in raw_config["kind"]:
-            embed_configs.append({
-              "skippable": skippable,
-              "kind": kind,
-              "model_year": model_year,
-              "pertubation_factor": pertubation_factor,
-            })
-
-  return embed_configs

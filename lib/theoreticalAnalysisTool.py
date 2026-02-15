@@ -2,7 +2,8 @@ from PIL import Image
 import torch
 import torch.nn.functional as F
 import datetime
-import lib.processingTool as pt
+import lib.databaseGateway as db
+import lib.configurationProvider as config
 import lib.rankCalculations as rc
 import lib.rectangles as rectangles
 
@@ -13,14 +14,14 @@ def get_frame_section(filename, coords):
   return section
 
 def get_derived_dataset_embeddings(bounding_box, embed_config):
-  model, preprocess, _ = pt.get_model(embed_config["model_year"])
-  filepaths, _, _, _ = pt.get_MVK_metadata()
+  model, preprocess, _ = db.get_model(embed_config["model_year"])
+  filepaths, _, _, _ = db.get_MVK_metadata()
 
   embeds = []
-  with torch.no_grad(), torch.amp.autocast(pt.device):
+  with torch.no_grad(), torch.amp.autocast(config.device):
     for i in range(len(filepaths)):
       frame_section = get_frame_section(filepaths[i], bounding_box)
-      preprocessed = preprocess(frame_section).unsqueeze(0).to(pt.device)
+      preprocessed = preprocess(frame_section).unsqueeze(0).to(config.device)
       embeds.append(model.encode_image(preprocessed).to('cpu'))
 
       if i % 100 == 0:
@@ -30,14 +31,14 @@ def get_derived_dataset_embeddings(bounding_box, embed_config):
     return concat
 
 def process_annotation(file_id, annotation_id, embed_config):
-  annotation = pt.get_annotation(file_id, annotation_id, embed_config["skippable"])
+  annotation = db.get_annotation(file_id, annotation_id, embed_config["skippable"])
   # skip nonexistent annotations
   if annotation == None:
     return
   # apply enlargement to the rect if any
-  rect = pt.get_annotation_rect(annotation, embed_config)
+  rect = db.get_annotation_rect(annotation, embed_config)
   embeddings = get_derived_dataset_embeddings(rect, embed_config)
-  pt.write_derived_dataset_embeddings(file_id, annotation_id, embeddings, embed_config)
+  db.write_derived_dataset_embeddings(file_id, annotation_id, embeddings, embed_config)
   print(f"Annotation finished at: {datetime.datetime.now()}")
 
 def process_annotations(annotations, file_id, embed_config):
@@ -47,44 +48,44 @@ def process_annotations(annotations, file_id, embed_config):
 
 def process_first_n_annotations(file_id, n, embed_config):
   print(f"Processing annotations from file {file_id}")
-  annotations = pt.get_first_n_annotations(file_id, n, embed_config["skippable"])
+  annotations = db.get_first_n_annotations(file_id, n, embed_config["skippable"])
   process_annotations(annotations, file_id, embed_config)
 
 def continue_processing_annotations(file_id, embed_config):
   print(f"Processing annotations from file {file_id}")
-  if not pt.annotation_file_exists(file_id, embed_config["skippable"]):
+  if not db.annotation_file_exists(file_id, embed_config["skippable"]):
     print("Annotation file does not exist")
     return
 
   # limit to 20 per kind
-  last_completed_annotation = pt.get_last_completed_annotation_id(file_id, embed_config)
+  last_completed_annotation = db.get_last_completed_annotation_id(file_id, embed_config)
   if last_completed_annotation >= 19:
     return
 
-  all_annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
+  all_annotations = db.get_file_annotations(file_id, embed_config["skippable"])
   annotations = all_annotations[last_completed_annotation + 1 : 20]
   process_annotations(annotations, file_id, embed_config)
   
 def get_file_results(file_id, model, tokenizer, embed_config):
-  annotations = pt.get_file_annotations(file_id, embed_config["skippable"])
+  annotations = db.get_file_annotations(file_id, embed_config["skippable"])
 
   result_list = []
   for annotation in annotations:
     annotation_id = annotation["id"]
 
     # skip if the embeddings file does not exist
-    if not pt.does_derived_dataset_embeddings_file_exist(file_id, annotation_id, embed_config):
+    if not db.does_derived_dataset_embeddings_file_exist(file_id, annotation_id, embed_config):
       continue
 
     frame_idx = annotation["frameIdx"]
     desc_short = annotation["desc_short"]
     desc_long = annotation["desc_long"]
-    rect = pt.get_annotation_rect(annotation, embed_config)
-    embeds = pt.read_derived_dataset_embeddings(file_id, annotation_id, embed_config).to(pt.device)
+    rect = db.get_annotation_rect(annotation, embed_config)
+    embeds = db.read_derived_dataset_embeddings(file_id, annotation_id, embed_config).to(config.device)
     rank_short = rc.get_frame_rank(desc_short, frame_idx, embeds, model, tokenizer)
     rank_long = rc.get_frame_rank(desc_long, frame_idx, embeds, model, tokenizer)
     result_list.append({
-      "author": pt.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
+      "author": db.get_filename_from_file_id(file_id, embed_config["skippable"])[:-len(".json")],
       "skippable": embed_config["skippable"],
       "annotation_id": annotation_id,
       "box_enlargements": embed_config["box_enlargements"],

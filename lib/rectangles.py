@@ -11,6 +11,18 @@ def normalize(rect):
     y1, y2 = y2, y1
   return [x1, y1, x2, y2]
 
+def normalize_recall_annotation(recall_annotation):
+  annotation = recall_annotation["annotation"]
+  for round in annotation["rounds"]:
+    for rect_id in ["initialRect", "finalRect"]:
+      rect = round[rect_id]
+      x = math.floor(rect["x"])
+      y = math.floor(rect["y"])
+      width = math.floor(rect["width"])
+      height = math.floor(rect["height"])
+      rect = [x, y, x + width, y + height]
+      round[rect_id] = rect
+
 def get_IoU(rect1, rect2):
   # normalize coords
   rect1 = normalize(rect1)
@@ -141,23 +153,21 @@ def random_perturbation_size(rect, magnitude = 10):
 
    return [center_x - (new_width/2), center_y - (new_height/2), center_x + (new_width/2), center_y + (new_height/2)]
 
-# shift the rectangle and change its size based on a factor relative to the frame size
-# rect dimensions are shifted by a random scalar taken from a gaussian with
-#   the pertubation factor multiplied with the average frame side as the standard deviation
+# shift the rectangle and changes its size
+# rect position shifted by a random scalar taken from a gaussian with
+#   the perturbation factor multiplied by 100 as the standard deviation
 # rect width and height is multiplied by a random factor taken
-#   from a gaussian with the pertubation factor as the standard deviation
-def pertube_rect2(rect, pertubation_factor, frame_width, frame_height):
-  avg_side = (frame_width + frame_height) / 2
+#   from a gaussian with the perturbation factor as the standard deviation
+def pertube_rect(rect, pertubation_factor, frame_width, frame_height):
+  shift_factor = pertubation_factor * 100
 
-  pertubed_rect = random_perturbation(rect, avg_side * pertubation_factor)
+  pertubed_rect = random_perturbation(rect, shift_factor)
   pertubed_rect = random_perturbation_size(pertubed_rect, pertubation_factor)
   pertubed_rect = normalize(pertubed_rect)
   pertubed_rect = confine_to_area(frame_width, frame_height, pertubed_rect)
   return pertubed_rect
 
-def pertube_rect(rect, pertubation_factor, frame_width, frame_height):
-  shift_factor = pertubation_factor * 100
-
+def pertube_rect_multi(rect, pertubation_factor, shift_factor, frame_width, frame_height):
   pertubed_rect = random_perturbation(rect, shift_factor)
   pertubed_rect = random_perturbation_size(pertubed_rect, pertubation_factor)
   pertubed_rect = normalize(pertubed_rect)
