@@ -107,7 +107,7 @@ def save_recall_static_grid_results():
       results.append_results(annotation_results)
       print(".", end="", flush=True)
     print("<c>", end="", flush=True)
-  results.to_csv(config.static_csv_path)
+  results.to_csv(config.static_recall_csv_path)
 
 def save_dynamic_grid_results():
   results = ResultAggregator()
