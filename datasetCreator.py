@@ -19,6 +19,8 @@ filenames = {
   False: not_skippable_filenames,
 }
 recall_annotations = db.get_recall_annotations()
+for annotation in recall_annotations:
+  rect.normalize_recall_annotation(annotation)
 
 # creates a CSV from raw annotations, also filters out duplicates
 def save_annotations():
@@ -49,7 +51,7 @@ def save_annotations():
 def save_recall_annotations():
   refined_annotations = []
   for annotation in recall_annotations:
-    rect.normalize_recall_annotation(annotation)
+    # rect.normalize_recall_annotation(annotation)
     for round_id in range(len(annotation["annotation"]["rounds"])):
       round = annotation["annotation"]["rounds"][round_id]
       # remove newline symbols from descriptions for better csv formatting
@@ -102,8 +104,11 @@ def save_recall_static_grid_results():
   results = ResultAggregator()
   for embed_config in config.get_static_embed_configs():
     model, _, tokenizer = db.get_model(embed_config["model_year"])
+    embeds = db.read_static_embeddings(embed_config["model_year"], embed_config["kind"])
+    # load segments to gpu
+    embeds = [segment_embeds.to(config.device) for segment_embeds in embeds]
     for annotation in recall_annotations:
-      annotation_results = sat.get_recall_annotation_results(annotation, model, tokenizer, embed_config)
+      annotation_results = sat.get_recall_annotation_results(annotation, model, tokenizer, embed_config, embeds)
       results.append_results(annotation_results)
       print(".", end="", flush=True)
     print("<c>", end="", flush=True)
@@ -125,6 +130,6 @@ def save_dynamic_grid_results():
 
 if __name__ == "__main__":
   # use the various "save_..." functions to produce the datasets you want
-  # save_annotations()
-  save_recall_static_grid_results()
+  save_recall_annotations()
+  # save_recall_static_grid_results()
   

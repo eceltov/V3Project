@@ -98,10 +98,7 @@ def get_file_results(file_id, model, tokenizer, embed_config):
 
   return result_list
 
-def get_recall_annotation_results(annotation, model, tokenizer, embed_config):
-  embeds = db.read_static_embeddings(embed_config["model_year"], embed_config["kind"])
-  # load segments to gpu
-  embeds = [segment_embeds.to(config.device) for segment_embeds in embeds]
+def get_recall_annotation_results(annotation, model, tokenizer, embed_config, embeds):
   segment_rects = kind_to_boundaries_callback(embed_config["kind"])(config.frame_width, config.frame_height)
 
   result_list = []
@@ -128,8 +125,8 @@ def get_recall_annotation_results(annotation, model, tokenizer, embed_config):
         "author": annotation["id"],
         "annotation_id": round_id,
         "bucket": annotation["bucket"],
-        "annotation_order": round["annotationOrder"],
-        "bucket_order": round["bucketOrder"],
+        "annotation_order": annotation["annotation_order"],
+        "bucket_order": annotation["bucket_order"],
         "rect_type": rect_type,
         "kind": embed_config["kind"],
         "model_year": embed_config["model_year"],
