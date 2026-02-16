@@ -131,6 +131,8 @@ def get_recall_annotation_results(annotation, model, tokenizer, embed_config, em
         "kind": embed_config["kind"],
         "model_year": embed_config["model_year"],
         "frame_idx": frame_idx,
+        "desc_global": desc_global,
+        "desc_object": desc_object,
         "rank_global": rank_global,
         "rank_object": rank_object,
         "IoU": IoU,

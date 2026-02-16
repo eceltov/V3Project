@@ -62,7 +62,7 @@ def get_recall_annotations():
   annotation_list = []
   for filename in annotation_filenames:
     file_path = os.path.join(annotations_dir_path, filename)
-    file = open(file_path, "r")
+    file = open(file_path, "r", encoding="utf-8")
     content = json.loads(file.read())
 
     tokens = filename.split("_")

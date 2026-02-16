@@ -130,6 +130,6 @@ def save_dynamic_grid_results():
 
 if __name__ == "__main__":
   # use the various "save_..." functions to produce the datasets you want
-  save_recall_annotations()
-  # save_recall_static_grid_results()
+  # save_recall_annotations()
+  save_recall_static_grid_results()
   
